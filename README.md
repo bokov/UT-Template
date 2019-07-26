@@ -3,7 +3,7 @@ A set of convenience functions and scripts to get your data analysis project up 
 
 To incorporate these scripts into a freshly-created data-analysis project, please create and clone a new git repo. Then, within that repo do this:
 
-    git submodule add git@github.com:bokov/ut-template scripts
+    git submodule add https://github.com/bokov/ut-template scripts
     git commit scripts -m "Added UT-Template module"
     git push
 
