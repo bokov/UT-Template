@@ -23,24 +23,20 @@ debug <- 0;
 
 # load stuff ----
 # load project-wide settings, including your personalized config.R
-if(debug>0) source('global.R') else {
-  .junk<-capture.output(source('global.R',echo=F))};
+if(debug>0) source('%7$s',chdir=T) else {
+  .junk<-capture.output(source('%7$s',chdir=T,echo=F))};
 # load any additional packages needed by just this script
 if(length(.packages) > 1 || .packages != '') instrequire(.packages);
 # start logging
 tself(scriptname=.currentscript);
-# track what objects here come from other scripts
-.origfiles <- ls(); .loadedobjects <- c();
-# run scripts on which this one depends, if any that have not been
-# cached yet
-if(length(.deps)>1 || .deps != ''){
-  for(ii in .deps){
-    .depdata <- paste0(ii,'.rdata');
-    if(!file.exists(.depdata)) {
-      system(sprintf('R -e "source(\'%%s\')"',ii))};
-    .loadedobjects <- union(.loadedobjects,tload(.depdata));
-  }
-}
+# Use the workdir
+.workdir <- getwd();
+# run scripts on which this one depends, if any that have not been cached yet
+.loadedobjects <- load_deps(.deps,cachedir = .workdir);
+
+# which files are here before anything new is created by this script
+.origfiles <- ls(all=T);
+
 #+ echo=F
 #############################################################
 # Your code goes below, content provided only as an example #
