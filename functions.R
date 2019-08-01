@@ -749,12 +749,23 @@ fs <- function(str,text=str,url=paste0('#',gsub('[^_a-z0-9]','-',tolower(str)))
 # Project Utilities ----
 personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                                 ,deps=c('dictionary.R'),packages=c()
-                                ,date=Sys.Date(),template='TEMPLATE.R'){
-  if(!all(deps %in% (.files <- list.files()))){
-    stop(
-      "Of the files you specified in the 'deps' argument the following are missing:\n"
-      ,paste0(setdiff(deps,.files),collapse=', '))};
-  out <- sprintf(readLines(template)
+                                ,date=Sys.Date(),template='TEMPLATE.R'
+                                ,path_to_global
+                                ,paths=c('.','..','MyProject')){
+  if(length(deps)>0){
+    .files <- sapply(deps,function(ii) !is.null(find_path(ii,paths)));
+    if(!all(.files)) stop(
+"Of the files you specified in the 'deps' argument the following are missing:\n"
+      ,paste0(deps[!.files],collapse=', '))};
+  # make sure the template exists
+  whichtemplate <- find_path(template,paths);
+  if(is.null(whichtemplate)) stop(sprintf('Cannot find file %s',template));
+  # make sure global.R exists
+  if(missing(path_to_global)) path_to_global<-grep('global.R'
+                                                   ,list.files(recursive = T)
+                                                   ,val=T);
+  if(length(path_to_global)==0) stop("Cannot find file 'global.R'");
+  out <- sprintf(readLines(whichtemplate)
                  ,title # The title that will appear in the header
                  ,author # Author, ditto
                  ,format(date,'%d/%m/%Y') # Date, ditto
@@ -763,6 +774,56 @@ personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                  ,file # ...so the file knows it's own name!
                  # dependencies on previously run files
                  ,paste('c(',paste0("'",deps,"'",collapse=','),')')
+                 # location of global.R
+                 ,path_to_global[1]
   );
   write(out,file);
+}
+
+find_path <- function(file,paths=c('.','..')){
+  # get the basename of the file
+  filebase <- basename(file);
+  # generate a search-paths for this file, starting with the path component
+  # of 'file'
+  filedirs <- if(filebase!=file) dirname(file) else c();
+  filedirs <- normalizePath(unique(c(filedirs,paths)));
+  # return the first full path in which the file is found to exist
+  for(ii in file.path(filedirs,filebase)) if(file.exists(ii)) return(ii);
+  return(c());
+}
+
+load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
+                      ,fallbackdir='MyProject',envir=parent.frame()){
+  if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
+  # what objects got loaded by this function
+  loadedobj=c();
+  for(ii in deps){
+    # if a cached .rdata file for this dependency cannot be found...
+    if(is.null(iicached<-find_path(paste0(ii,'.rdata')
+                                   ,c(cachedir,scriptdir,fallbackdir)))){
+      # run that script and create one
+      if(!is.null(iiscript<-find_path(ii,c(scriptdir,fallbackdir)))){
+        # TODO: modify all files to write their cached results to a user 
+        # specified path if one is provided
+        message(sprintf('Trying to initialize cache using script %s'
+                        ,iiscript));
+        system(sprintf('R -e ".workdir<-\'%s\'; source(\'%s\',chdir=T)"'
+                       ,cachedir,iiscript));
+        # again try to find a valid path to it
+        iicached <- find_path(paste0(ii,'.rdata')
+                              ,c(cachedir,scriptdir,fallbackdir));
+        } else{
+          # if cannot find script, error
+          stop(sprintf('The script %s was not found',ii));
+        }};
+    # if there is still no cached .rdata found, error
+    if(is.null(iicached)){
+      stop(sprintf('The cached file for %s could not be found',iiscript));
+      # otherwise, the cached .rdata now exists one way or another, load it
+    } else {
+      loadedobj <- union(loadedobj,tload(iicached,envir=envir));
+      message(sprintf('Loaded data for %s from %s',ii,iicached));
+      };
+  }
+  return(loadedobj);
 }
