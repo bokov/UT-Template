@@ -10,12 +10,9 @@ debug <- 0;
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .depends <- 'dictionary.R';
-#.depdata <- paste0(.depends,'.rdata');
 .currentscript <- parent.frame(2)$ofile;
 if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
 tself(scriptname=.currentscript);
-#if(!file.exists(.depdata)) system(sprintf('R -e "source(\'%s\')"',.depends));
-#.loadedobjects <- tload(.depdata);
 .loadedobjects <- load_deps(.depends,cachedir = .workdir);
 #knitr::opts_chunk$set(echo = F,warning = F,message=F);
 #' Default args (example)
