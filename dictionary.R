@@ -49,7 +49,9 @@ dct0 <- tblinfo(dat0);
 #' ## Save all the processed data to an rdata file 
 #' 
 #' ...which includes the audit trail
-suppressWarnings(tsave(file=paste0(.currentscript,'.rdata')
+suppressWarnings(tsave(file=file.path(.workdir
+                                      ,paste0(basename(.currentscript)
+                                              ,'.rdata'))
                        ,list=setdiff(ls(),.origfiles)));
 #+ echo=F,eval=F
 c()
