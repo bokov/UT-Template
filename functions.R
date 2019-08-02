@@ -761,9 +761,10 @@ personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
   whichtemplate <- find_path(template,paths);
   if(is.null(whichtemplate)) stop(sprintf('Cannot find file %s',template));
   # make sure global.R exists
-  if(missing(path_to_global)) path_to_global<-grep('global.R'
-                                                   ,list.files(recursive = T)
-                                                   ,val=T);
+  if(missing(path_to_global)) path_to_global<-find_relpath('global.R'
+                                                           ,c('.','..','../..')
+                                                           ,recursive = T
+                                                           ,normalize = F);
   if(length(path_to_global)==0) stop("Cannot find file 'global.R'");
   out <- sprintf(readLines(whichtemplate)
                  ,title # The title that will appear in the header
@@ -789,6 +790,21 @@ find_path <- function(file,paths=c('.','..')){
   filedirs <- normalizePath(unique(c(filedirs,paths)));
   # return the first full path in which the file is found to exist
   for(ii in file.path(filedirs,filebase)) if(file.exists(ii)) return(ii);
+  return(c());
+}
+
+find_relpath <- function(file,paths=c('..','../..','.'),recursive=F
+                         ,normalize=T){
+  filebase <- basename(file);
+  paths<-c(if(filebase!=file && file.exists(dirname(file))){
+    dirname(file)} else c(),paths);
+  for(ii in paths){
+    .paths <- file.path(c(ii,list.dirs(ii,full.names = T,recursive=recursive))
+                        ,filebase);
+    if(any(.found<-file.exists(.paths))){
+      return(if(normalize) normalizePath(.paths[.found]) else .paths[.found])};
+  }
+  # if returns empty vector means none found
   return(c());
 }
 
