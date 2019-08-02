@@ -67,7 +67,7 @@ cm <- with_cm <- function(xx,comment=NULL,append=T
 #'
 #' @return Does not return anything.
 #'
-#' @examples `checkrun('dat3',{group_by(dat00.01,idn_mrn) %>% summarise_all(first)});`
+#' @examples `checkrun('dat3',{group_by(dat1,idn_mrn) %>% summarise_all(first)});`
 checkrun <- function(obj,EXPR,env=as.environment(-1)){
   env<-env;
   if(length(ls(env,all=T,pattern=obj))==0){
@@ -523,6 +523,26 @@ t_autoread <- function(file,...){
     if(is(.result,'try-error')) return(getTryMsg(.result));
   }
   do.call(tread,c(list(file,readfun=autoread),list(...)));
+}
+
+guess_skip <- function(file,reader=read_csv,args=list(),skip_max=20
+                       ,n_max=100
+                       ,dynVarNames='^[0-9]+[_.]?[0-9]*$|__[0-9]+$|^[VX][0-9]+$'
+                       ,...){
+  args$nrows <- args$n_max <- n_max;
+  if('skip' %in% names(args)) args[['skip']] <- NULL;
+  # remove illegal arguments
+  if(!'...' %in% .argnames <- names(formals(reader))){
+    for(ii in names(args)) if(!ii %in% .argnames) args[[ii]] <- NULL;
+  } else args <- c(args,...);
+  args <- c(file,args);
+  .test <- sapply(seq(0,skip_max),function(xx){
+    do.call(reader,c(args,skip=xx));});
+  .nDynVarNames <- sapply(.test,function(xx) sum(grepl(dynVarNames,names(xx))));
+  if(sum(min(.nDynVarNames)==.nDynVarNames)==1){
+    return(which.min(.nDynVarNames)-1)};
+  .charCols <- sapply(.test,function(xx) all(sapply(xx,class=='character')));
+  browser();
 }
 
 #' Autoguessing function for reading most common data formats
