@@ -16,7 +16,7 @@ tself(scriptname=.currentscript);
 .loadedobjects <- load_deps(.depends,cachedir = .workdir);
 #knitr::opts_chunk$set(echo = F,warning = F,message=F);
 #' Default args (example)
-#formals(v)$dat <- as.name('dat1');
+#formals(v)$dat <- as.name('dat00.01');
 
 #' Saving original file-list so we don't keep exporting functions and 
 #' environment variables to other scripts
@@ -28,7 +28,7 @@ if('pre_data.R' %in% list.files()) source('pre_data.R');
 #' Create custom synonyms for `TRUE` if needed
 l_truthy_default <- eval(formals(truthy.default)$truewords);
 l_missing <- c(NA,'Unknown','unknown','UNKNOWN');
-# dat1 organize codes ----------------------------------------------------------
+# dat00.01 organize codes ----------------------------------------------------------
 #' Load manual code mappings
 if(file.exists(levels_map_file)){
   levels_map <- tread(levels_map_file,read_csv,na='')};
@@ -39,8 +39,8 @@ if(pn %in% names(dat00)){
 }
 
 if(exists('groupvar') && groupvar %in% names(dat00)){
-  dat1 <- group_by(dat00,patient_num);
-} else dat1 <- dat00;
+  dat00.01 <- group_by(dat00,patient_num);
+} else dat00.01 <- dat00;
 #' 
 #' Bulk-transform the NA/non-NA columns to FALSE/TRUE ones
 #
@@ -67,10 +67,10 @@ if(exists('groupvar') && groupvar %in% names(dat00)){
 #' will later be analyzed separately. This is a good place ot create lists of 
 #' their IDs. Example: unique patient numbers for patients who happen to have
 #' `TRUE` as the value of either `var1` or `var2` 
-#kcpatients.emr <- subset(dat1,var1|var2)$patient_num %>% unique;
+#kcpatients.emr <- subset(dat00.01,var1|var2)$patient_num %>% unique;
 
 #+ echo=F
-# dat1 more analytical variables  ----------------------------------------------
+# dat00.01 more analytical variables  ----------------------------------------------
 #' ## More Analytical Variables
 #' 
 #' Any other within-row transformations you need to do on your data?
@@ -95,7 +95,7 @@ c(-320,-241,-116,-15,1,46,89)
 #' ## Final Data Transformations
 #' 
 #' Any transformations that have to be done after longitudinal transformations
-#' in the above section. You should not do any transformations of dat1 below
+#' in the above section. You should not do any transformations of dat00.01 below
 #' this section of the script
 
 #+ echo=F
@@ -106,7 +106,7 @@ c(-320,-241,-116,-15,1,46,89)
 #' reproducibly.
 tseed(project_seed);
 #' Randomly to training, testing, or validation sets
-if(pn %in% names(dat1)) pat_samples <- unique(dat1[[pn]]) %>% 
+if(pn %in% names(dat00.01)) pat_samples <- unique(dat00.01[[pn]]) %>% 
     split(.,sample(c('train','test','val'),size=length(.),rep=T));
 
 #+ echo=F

@@ -67,7 +67,7 @@ cm <- with_cm <- function(xx,comment=NULL,append=T
 #'
 #' @return Does not return anything.
 #'
-#' @examples `checkrun('dat3',{group_by(dat1,idn_mrn) %>% summarise_all(first)});`
+#' @examples `checkrun('dat3',{group_by(dat00.01,idn_mrn) %>% summarise_all(first)});`
 checkrun <- function(obj,EXPR,env=as.environment(-1)){
   env<-env;
   if(length(ls(env,all=T,pattern=obj))==0){
