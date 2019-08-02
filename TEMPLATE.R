@@ -61,11 +61,11 @@ panderOptions('table.continues',.oldopt00);
 #' 
 #' Predictors
 # Uncomment the below line after putting in the actual predictor column names
-# from your dat0
+# from your dat00
 #predictorvars <- c('FOO','BAR','BAZ','BAT');
 #' Outcomes
 # Uncomment the below line after putting in the actual outcome column names
-# from your dat0
+# from your dat00
 #outcomevars <- c('BAN','BAX');
 #' All analysis-ready variables
 # Uncomment the below line after predictorvars and outcomevars already exist
@@ -77,7 +77,7 @@ panderOptions('table.continues',.oldopt00);
 # Uncomment the below after mainvars already exists and you have chosen a 
 # discrete variable to take the place of VAR1 (note that you don't quote that
 # one)
-#ggpairs(dat0[,mainvars],mapping=aes(color=VAR1));
+#ggpairs(dat00[,mainvars],mapping=aes(color=VAR1));
 #' ### Cohort Characterization (step 10)
 #' 
 #' To explore possible covariates
@@ -85,7 +85,7 @@ panderOptions('table.continues',.oldopt00);
 # variable to take the place of VAR1 (this time you do quote it)
 #
 #pander(print(CreateTableOne(
-#  vars = setdiff(mainvars,'VAR1'),strata='VAR1',data = dat0
+#  vars = setdiff(mainvars,'VAR1'),strata='VAR1',data = dat00
 #  , includeNA = T), printToggle=F), caption='Group Characterization');
 
 #' ### Data Analysis

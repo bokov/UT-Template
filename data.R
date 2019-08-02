@@ -34,13 +34,13 @@ if(file.exists(levels_map_file)){
   levels_map <- tread(levels_map_file,read_csv,na='')};
 
 #' Create copy of original dataset
-if(pn %in% names(dat0)){
+if(pn %in% names(dat00)){
   groupvar <- pn;
 }
 
-if(exists('groupvar') && groupvar %in% names(dat0)){
-  dat1 <- group_by(dat0,patient_num);
-} else dat1 <- dat0;
+if(exists('groupvar') && groupvar %in% names(dat00)){
+  dat1 <- group_by(dat00,patient_num);
+} else dat1 <- dat00;
 #' 
 #' Bulk-transform the NA/non-NA columns to FALSE/TRUE ones
 #

@@ -20,24 +20,24 @@ tself(scriptname=.currentscript);
 if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 
 #+ echo=F
-# read dat0 ----
+# read dat00 ----
 #' generic read function which auto-guesses file formats:
-dat0 <- t_autoread(inputdata,file_args=file_args);
+dat00 <- t_autoread(inputdata,file_args=file_args);
 
 #' ## Optional: patient number
 #' 
 #' If you patient number variable (see `global.R`) is a number, force it to be
 #' treated as character rather than an integer to avoid missing values due to it 
 #' being too large
-if(pn %in% names(dat0)) dat0[[pn]] <- as.character(dat0[[pn]]);
+if(pn %in% names(dat00)) dat00[[pn]] <- as.character(dat00[[pn]]);
 
 #+ echo=F
 # make data dictionary ----
 #' ## Create the data dictionary
-dct0 <- tblinfo(dat0);
+dct0 <- tblinfo(dat00);
 
 #+ echo=F
-# a few dat0 hacks ----
+# a few dat00 hacks ----
 #' ## Raw Data Ops
 #' 
 #' Since you're messing around with the raw data anyway, if there is anything 

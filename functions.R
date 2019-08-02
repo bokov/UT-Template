@@ -651,7 +651,7 @@ vartype <- function(dat, ctype) {
 
 #' Not yet ready:
 #' 
-# rebuild_dct <- function(dat=dat0,rawdct=dctfile_raw,tpldct=dctfile_tpl,debuglev=0
+# rebuild_dct <- function(dat=dat00,rawdct=dctfile_raw,tpldct=dctfile_tpl,debuglev=0
 #                         ,tread_fun=read_csv,na='',searchrep=c()){
 #   out <- names(dat)[1:8] %>% 
 #     tibble(colname=.,colname_long=.,rule='demographics') %>% 
@@ -659,9 +659,9 @@ vartype <- function(dat, ctype) {
 #   if(length(na.omit(out$colname))!=length(unique(na.omit(out$colname)))){
 #     stop('Invalid data dictionary! Duplicate values in colname column');}
 #   out$colname <- tolower(out$colname);
-#   #dct0 <- subset(dct0,dct0$colname %in% names(dat0));
+#   #dct0 <- subset(dct0,dct0$colname %in% names(dat00));
 #   shared <- intersect(names(dat),out$colname);
-#   out[out$colname %in% shared,'class'] <- lapply(dat0[,shared],class) %>% sapply(head,1);
+#   out[out$colname %in% shared,'class'] <- lapply(dat00[,shared],class) %>% sapply(head,1);
 #   out$colsuffix <- gsub('^v[0-9]{3}','',out$colname);
 #   if(debug>0) .outbak <- out;
 #   # end debug
