@@ -115,13 +115,14 @@ n_skip <- 0;
 file_args <- list(check.names=T,blank.lines.skip=T);
 #' ## Load local config file
 #' 
-if(!file.exists('config.R')){
+.configpath <- find_relpath('config.R');
+if(is.null(.configpath)){
   stop('Please copy example_config.R to config.R, modify it so that the '
        ,'\'inputdata\' variable is the full path to your data file on your '
        ,'local computer, back up your config.R to some local location outside '
        ,'this repository, and then try running this script again.')};
 
-source('./config.R');
+source(.configpath);
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
