@@ -11,13 +11,17 @@ if(!is.null(attr(system('git config --global user.email',intern=T),'status'))){
 }
 
 # Set up useful aliases ----
-if(!is.null(attr(system('git config alias.upd',intern=T),'status'))){
-  system('git config --global alias.upd "submodule update --init --recursive --remote"')
-  } else warning('You already have a git alias named "upd", leaving it unchanged.');
+if(!is.null(attr(suppressWarnings(system('git config alias.upd',intern=T))
+                 ,'status'))){
+  system('git config --global alias.upd "submodule update --init --recursive\
+         --remote"')} else warning(
+           'You already have a git alias named "upd", leaving it unchanged.');
 
-if(!is.null(attr(system('git config alias.lg',intern=T),'status'))){
-  system('git config --global alias.lg "log --oneline --graph --color --all --decorate"')
-  } else warning('You already have a git alias named "lg", leaving it unchanged.');
+if(!is.null(attr(suppressWarnings(system('git config alias.lg',intern=T))
+                 ,'status'))){
+  system('git config --global alias.lg "log --oneline --graph --color --all\
+         --decorate"')} else warning(
+           'You already have a git alias named "lg", leaving it unchanged.');
 
 if(!dir.exists('scripts') && dir.exists('../scripts')) setwd('..')
 
