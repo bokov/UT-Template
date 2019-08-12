@@ -115,7 +115,7 @@ n_skip <- 0;
 file_args <- list(check.names=T,blank.lines.skip=T);
 #' ## Load local config file
 #' 
-.configpath <- find_relpath('config.R');
+.configpath <- find_relpath('config.R')[1];
 if(is.null(.configpath)){
   stop('Please copy example_config.R to config.R, modify it so that the '
        ,'\'inputdata\' variable is the full path to your data file on your '
