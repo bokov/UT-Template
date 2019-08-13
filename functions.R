@@ -830,6 +830,14 @@ find_relpath <- function(file,paths=c('..','../..','.'),recursive=F
   return(c());
 }
 
+# remove all the cached files created by this project
+# WARNING: if for some reason you have files lying around ending in
+# ".R.rdata" then the y will be removed as well! If you want to keep
+# them, rename them to something else or change the argument
+clear_cache <- function(pattern='*.R.rdata'){
+  file.remove(list.files(pattern=pattern,recursive=T
+                         ,full.names = T))};
+
 load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                       ,fallbackdir='scripts',envir=parent.frame()){
   if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
