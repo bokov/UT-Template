@@ -17,8 +17,8 @@ instrequire <- function(pkgs
                         # the dependencies argument is ignored and is only here so
                         # that it doesn't end up in the '...'
                         ,dependencies=TRUE
-                        ,repos=getOption('repos','https://cran.rstudio.com/'
-                        ,...)){
+                        ,repos=getOption('repos','https://cran.rstudio.com/')
+                        ,...){
   pkgs_installed <- sapply(pkgs,require,character.only=T);
   if(length(pkgs_needed <- names(pkgs_installed[!pkgs_installed]))>0){
     install.packages(pkgs_needed,repos=repos,dependencies = T,...);
