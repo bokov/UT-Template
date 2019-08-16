@@ -12,12 +12,16 @@ if(!exists('coalesce')){
 #' This function takes a list of package named, loads them if they are
 #' available, otherwise attempts to install each one and then again 
 #' attempts to load it.
-instrequire <- function(pkglist
+instrequire <- function(pkgs
                         ,quietly=TRUE
-                        ,repos=getOption('repos','https://cran.rstudio.com/')){
-  pkgs_installed <- sapply(pkglist,require,character.only=T);
+                        # the dependencies argument is ignored and is only here so
+                        # that it doesn't end up in the '...'
+                        ,dependencies=TRUE
+                        ,repos=getOption('repos','https://cran.rstudio.com/'
+                        ,...)){
+  pkgs_installed <- sapply(pkgs,require,character.only=T);
   if(length(pkgs_needed <- names(pkgs_installed[!pkgs_installed]))>0){
-    install.packages(pkgs_needed,repos=repos,dependencies = T);
+    install.packages(pkgs_needed,repos=repos,dependencies = T,...);
     pkgs_final <- sapply(pkgs_needed,require,character.only=T,quietly=quietly);
     if(!all(pkgs_final)){
       stop(c('the following required packages could not be installed:\n'
