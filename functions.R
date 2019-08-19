@@ -560,14 +560,42 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
   # order of ... 
   for(ii in intersect(names(args),names(file_args))) file_args[[ii]] <- NULL;
   args <- c(file_args,args);
-  # check for text formats
-  if(nrow(enc<-guess_encoding(file))>0){
+  reader <- 'auto'
+  # check for Excel formats
+  sheets <- try(.Call('readxl_xlsx_sheets',PACKAGE='readxl',file),silent=T);
+  if(!is(sheets,'try-error')) reader <- 'read_xlsx' else{
+    sheets <- try(.Call('readxl_xls_sheets',PACKAGE='readxl',file),silent=T);
+    if(!is(sheets,'try-error')) reader <- 'read_xls';
+  }
+  if(!is(sheets,'try-error') && length(sheets)>1 && !'sheet' %in% names(args)){
+    warning(
+      "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
+      ,"\nReading in the first sheet. If you want a different one"
+      ,"\nplease specify a 'sheet' argument")};
+  
+  if(reader == 'auto' && nrow(enc<-guess_encoding(file))>0){
+    # if it's a zip file, this unzips it and replaces the original file arg
+    # with the temporary unzipped version
+    unzfile <- suppressWarnings(unzip(file,exdir = tempfile("autoread")));
+    if(length(unzfile)>1){ if(!'sheet' %in% names(args)){
+      warning(
+        "\nMultiple files found in ",file,":\n"
+        ,paste(list.files(dirname(unzfile),recursive = T,all.files = T)
+               ,collapse=',')
+        ,"\nReading in the first file. If you want a different one"
+        ,"\nplease specify a 'sheet' argument");
+        unzfile <- unzfile[1]} else unzfile <- unzfile[args$sheet]};
+    if(length(unzfile==1)){
+      message('Reading unzipped file',basename(unzfile));
+      file <- unzfile;}
+    message('Trying to read as a text file with fread()')
     # try to read as a delimited file via fread
     txargs <- args[intersect(names(args),names(formals(fread)))];
     txargs$na.strings <- na;
     out <- try(as_tibble(do.call(fread,c(list(input=file),txargs)))
                ,silent = T);
     if(!is(out,'try-error')) return(fixnames(out));
+    message('fread() failed! Falling back on read_delim');
     txargs <- args[intersect(names(args),names(formals(read_delim)))];
     txargs$na <- na;
     txargs$delim <- '\t';
@@ -586,24 +614,11 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     stop(attr(out,'condition')$message);
   }
   # try various binary formats
-  xlargs <- args[intersect(names(args),names(formals(read_xls)))];
-  xlargs$na <- na;
-  # xlsx
-  sheets <- try(.Call('readxl_xlsx_sheets',PACKAGE='readxl',file),silent=F);
-  if(!is(sheets,'try-error')){
-    if(length(sheets)>1 && !'sheet' %in% names(xlargs)) warning(
-      "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
-      ,"\nReading in the first sheet. If you want a different one"
-      ,"\nplease specify a 'sheet' argument")
-    return(fixnames(do.call(read_xlsx,c(list(path=file),xlargs))));}
-  # xls
-  sheets <- try(.Call('readxl_xls_sheets',PACKAGE='readxl',file),silent=F);
-  if(!is(sheets,'try-error')){
-    if(length(sheets)>1 && !'sheet' %in% names(xlargs)) warning(
-      "Multiple sheets found: ",paste(sheets,collapse=', ')
-      ,"\nReading in the first sheet. If you want a different one"
-      ,"\nplease specify a 'sheet' argument")
-    return(fixnames(do.call(read_xls,c(list(path=file),xlargs))));}
+  if(reader %in% c('read_xls','read_xlsx')){
+    xlargs <- args[intersect(names(args),names(formals(read_xls)))];
+    xlargs$na <- na;
+    return(fixnames(do.call(reader,c(list(path=file),xlargs))))};
+
   # need to unzip the file?
   out <- try(unzip(file,list=T));
   if(!is(out,'try-error')){
