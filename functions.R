@@ -619,18 +619,6 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     xlargs$na <- na;
     return(fixnames(do.call(reader,c(list(path=file),xlargs))))};
 
-  # need to unzip the file?
-  out <- try(unzip(file,list=T));
-  if(!is(out,'try-error')){
-    if(length(zfiles <- out$Name[out$Length>0])==1){
-      out <- unzip(file,files=zfiles,exdir=tempdir());
-      return(autoread(out,na=na,...));
-    } else {
-      print(zfiles);
-      stop('Please unzip the input file and run autoread() 
-           on the individual files inside it.');
-    }
-    }
   message('\nUnknown file type?\n');
   stop(attr(out,'condition')$message);
   }
