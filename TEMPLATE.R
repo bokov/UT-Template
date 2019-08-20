@@ -29,7 +29,7 @@ debug <- 0;
 if(debug>0) source('%7$s',chdir=T) else {
   .junk<-capture.output(source('%7$s',chdir=T,echo=F))};
 # load any additional packages needed by just this script
-if(length(.packages) > 1 || .packages != '') instrequire(.packages);
+if(length(setdiff(.packages,''))>1) instrequire(.packages);
 # start logging
 tself(scriptname=.currentscript);
 # Use the workdir
