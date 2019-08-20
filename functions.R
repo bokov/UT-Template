@@ -572,7 +572,6 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
       "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
       ,"\nReading in the first sheet. If you want a different one"
       ,"\nplease specify a 'sheet' argument")};
-  
   if(reader == 'auto' && nrow(enc<-guess_encoding(file))>0){
     # if it's a zip file, this unzips it and replaces the original file arg
     # with the temporary unzipped version
@@ -618,6 +617,11 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     xlargs <- args[intersect(names(args),names(formals(read_xls)))];
     xlargs$na <- na;
     return(fixnames(do.call(reader,c(list(path=file),xlargs))))};
+  
+  # SPSS, SAS, and Stata
+  for(ff in c(read_sav,read_por,read_dta,read_xpt)){
+    if(!is(try(out <- ff(file),silent=T),'try-error')) return(fixnames(out));
+  }
 
   message('\nUnknown file type?\n');
   stop(attr(out,'condition')$message);
