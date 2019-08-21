@@ -619,9 +619,17 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     return(fixnames(do.call(reader,c(list(path=file),xlargs))))};
   
   # SPSS, SAS, and Stata
+  # one of these has some error message that bubbles through despite silent=T
+  # so we sink before the for loop, unsink if one of the readers succeeds...
+  sink(tempfile());
   for(ff in c(read_sav,read_por,read_dta,read_xpt)){
-    if(!is(try(out <- ff(file),silent=T),'try-error')) return(fixnames(out));
+      {
+        if(!is(try(out <- ff(file),silent=T),'try-error')){
+          sink();
+          return(fixnames(out))}}
   }
+  # and unsink at the end if none of them succeed
+  sink();
 
   message('\nUnknown file type?\n');
   stop(attr(out,'condition')$message);
@@ -656,6 +664,12 @@ tblinfo <- function(dat,custom_stats=alist()
                     ,info_cols=alist(
                        c_empty=frc_missing==1,c_uninformative=n_nonmissing<2
                       ,c_ordinal=uniquevals<10&isnum
+                      # The below is an experiment with automatically adding 
+                      # explanatory labels to columns. Problem is, it's
+                      # invisible to pander() and in View() is creates wide 
+                      # columns that get truncated anyway
+                      # ,c_ordinal=with_attrs(uniquevals<10&isnum
+                      #                       ,list(label=strwrap('Is this a numeric column that is candidate for converting to discrete values?',prefix='\n')))
                       ,c_tm=uniquevals==1&n_missing>0
                       ,c_tf=uniquevals==2,c_numeric=isnum&!c_ordinal
                       ,c_factor=uniquevals<20&!isnum
