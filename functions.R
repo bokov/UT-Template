@@ -796,7 +796,8 @@ personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                                 ,deps=c('dictionary.R'),packages=c()
                                 ,date=Sys.Date(),template='TEMPLATE.R'
                                 ,path_to_global
-                                ,paths=c('.','..','scripts')){
+                                ,paths=c('.','..','scripts')
+                                ,notebook=F){
   # TODO: interactively prompt for non-default title and author if interactive
   # TODO: ask if want to be prompted for the other arguments if interactive
   if(length(deps)>0){
@@ -826,6 +827,7 @@ personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                  ,path_to_global[1]
   );
   write(out,file);
+  if(notebook) spin(file,knit=F);
 }
 
 find_path <- function(file,paths=c('.','..')){
