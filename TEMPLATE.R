@@ -5,7 +5,7 @@
 #' ---
 #' 
 #+ message=F,echo=F
-# init -----
+# init ------
 if(interactive()){
   try(source('https://raw.githubusercontent.com/bokov/UT-Template/master/git_setup.R'));
 };
