@@ -15,7 +15,7 @@
 #' 
 if(!exists('.workdir')) .workdir <- '.';
 #' Upstream repo
-options('git.upstream','git@github.com:bokov/2019-SP-TSCI-5050');
+options('git.upstream','git@github.com:bokov/2019-FA-TSCI-5050');
 #' get current working directory
 cwd <- getwd(); cwd;
 #' If `global.R` isn't found, try to find it
