@@ -650,7 +650,8 @@ colinfo <- function(col,custom_stats=alist(),...){
               ,frc_missing=mean(isna)
               ,n_nonrepeat=sum(coltab==1)
               ,frc_nonrepeat=sum(coltab==1)/length(nona)
-              ,frc_max=paste0(sort(coltab,decreasing = T)[1:3],collapse=':')
+              ,top3=paste0(names(sort(coltab,decreasing = T)[1:3])
+                              ,collapse=':')
   );
   for(ii in names(custom_stats)){
     out[[ii]] <- eval(custom_stats[[ii]],envir = out)};
