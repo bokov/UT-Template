@@ -43,12 +43,12 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
                             ,'after it to work!');
   # remove cached files
   file.remove(list.files(pattern=removepatt,all=T,recursive=T,full.names = T));
+  # Update the git submodules
+  if(updatemodules) git_subupd();
   # clear out calling environment
   rm(list=ls(all=all,envir = envir),envir = envir);
   # also global environment if specified
   if(cleanglobal) rm(list=ls(all=all,envir=.GlobalEnv),envir = .GlobalEnv);
-  # Update the git submodules
-  if(updatemodules) git_subupd();
   # if rstudioapi available, use it to restart the session
   if(require(rstudioapi) && rstudioapi::isAvailable()){
     rstudioapi::restartSession(command)};
