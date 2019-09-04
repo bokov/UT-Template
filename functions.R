@@ -1,28 +1,29 @@
 # small utils ------------------------------------------------------------------
 
-#' I'd rather not introduce a dependency for just one function, on the other
-#' I trust Dr. Wickam & Co.'s code more than my own inexperienced stumblings so 
-#' if coalesce is already available, I use that one.
-#'  
+# I'd rather not introduce a dependency for just one function, on the other
+# I trust Dr. Wickam & Co.'s code more than my own inexperienced stumblings so 
+# if coalesce is already available, I use that one.
+#  
 if(!exists('coalesce')){
   coalesce <- function(...){
     Reduce(function(xx,yy) ifelse(is.na(xx),yy,xx),list(...))}
 }
 
-#' This function takes a list of package named, loads them if they are
+#' This function takes a list of package names, loads them if they are
 #' available, otherwise attempts to install each one and then again 
 #' attempts to load it.
-instrequire <- function(pkgs
+instrequire <- function(pkgs # nodeps
                         ,quietly=TRUE
-                        # the dependencies argument is ignored and is only here so
-                        # that it doesn't end up in the '...'
+                        # the dependencies argument is ignored and is only here 
+                        # so that it doesn't end up in the '...'
                         ,dependencies=TRUE
                         ,repos=getOption('repos','https://cran.rstudio.com/')
                         ,...){
-  pkgs_installed <- sapply(pkgs,require,character.only=T);
+  pkgs_installed <- sapply(pkgs,require,character.only=TRUE);
   if(length(pkgs_needed <- names(pkgs_installed[!pkgs_installed]))>0){
-    install.packages(pkgs_needed,repos=repos,dependencies = T,...);
-    pkgs_final <- sapply(pkgs_needed,require,character.only=T,quietly=quietly);
+    install.packages(pkgs_needed,repos=repos,dependencies = TRUE,...);
+    pkgs_final <- sapply(pkgs_needed,require,character.only=TRUE
+                         ,quietly=quietly);
     if(!all(pkgs_final)){
       stop(c('the following required packages could not be installed:\n'
              ,paste0(names(pkgs_final[!pkgs_final]),collapse = ', ')));
@@ -30,9 +31,29 @@ instrequire <- function(pkgs
   };
 }
 
+clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:git_subupd
+                        ,all=TRUE,cleanglobal=TRUE
+                        ,updatemodules=!file.exists('.developer')
+                        ,envir=parent.frame()){
+  if(!interactive()) warning('This function is intended to run in an '
+                            ,'interactive session to restart that\n  '
+                            ,'session on a clean slate. If you are calling it '
+                            ,'non-interactively  (from a\n  script or '
+                            ,'function), don\'t expect any code that you put '
+                            ,'after it to work!');
+  # remove cached files
+  file.remove(list.files(pattern=removepatt,all=T,recursive=T,full.names = T));
+  # clear out calling environment
+  rm(list=ls(all=all,envir = envir),envir = envir);
+  # also global environment if specified
+  if(cleanglobal) rm(list=ls(all=all,envir=.GlobalEnv),envir = .GlobalEnv);
+  # Update the git submodules
+  if(updatemodules) git_subupd();
+  # if rstudioapi available, use it to restart the session
+  if(require(rstudioapi)) rstudioapi::restartSession(command);
+}
 
-#' Function for appending or replacing attributes of any object 
-#' within a pipeline
+#' Append or replace attributes of any object in a pipeline-frindly way.
 #'
 #' @param xx        Object whose attributes to modify and then return the object
 #' @param rep.attrs Named list of attributes to create or replace
@@ -42,7 +63,16 @@ instrequire <- function(pkgs
 #' @export
 #'
 #' @examples
-with_attrs<-function(xx,rep.attrs=list(),app.attrs=list()){
+#' # Change an object's attribute
+#' with_attr(iris,list(class='list'))
+#' 
+#' # Create a new attribute for an object
+#' foo <- with_attr(LETTERS,list(comment='Hello world'))
+#' comment(foo)
+#' foo <- with_attr(foo,rep='One more comment.')
+#' comment(foo)
+#' 
+with_attrs<-function(xx,rep.attrs=list(),app.attrs=list()){ # nodeps
   attrs <- attributes(xx); if(is.null(attrs)) attrs<-list();
   for(ii in names(rep.attrs)) attrs[[ii]] <- rep.attrs[[ii]];
   for(ii in names(app.attrs)) attrs[[ii]] <- c(attrs[[ii]],app.attrs[[ii]]);
@@ -51,7 +81,7 @@ with_attrs<-function(xx,rep.attrs=list(),app.attrs=list()){
 }
 
 #' takes input and returns it with a comment attribute
-cm <- with_cm <- function(xx,comment=NULL,append=T
+cm <- with_cm <- function(xx,comment=NULL,append=T # deps:with_attrs
                           ,transf=stringr::str_squish){
   if(!is.null(transf)) comment <- transf(comment);
   if(append) with_attrs(xx,app.attrs=list(comment=comment)) else {
@@ -124,14 +154,14 @@ fullargs <- function(syspar=sys.parent(),env=parent.frame(2L),expand.dots=TRUE){
 #' preserving their dimensions (obtained from the first argument of ...)
 
 # figure out how the current OS represents the top of its file system
-systemRootDir <- function(){
+systemRootDir <- function(){ 
   dir <- dirname(normalizePath('.'));
   newdir <- dirname(dir);
   while(dir!=newdir){dir<-newdir; newdir <- dirname(newdir)}
   return(newdir);
 }
 
-mprintf <- function(fmt,...,flattenmethod=1){
+mprintf <- function(fmt,...,flattenmethod=1){ #WIP
   dots <- list(...);
   out<-dots[[1]];
   # if factors not converted to characters, those cells will come out as NA
@@ -154,21 +184,39 @@ mprintf <- function(fmt,...,flattenmethod=1){
   }
 
 # extract the error message of the argument
-getTryMsg <- function(xx,ifNotErr=xx){
+getTryMsg <- function(xx,ifNotErr=xx){ # revdeps: t_autoread
   if(is(xx,'try-error')) return(attr(bla,'condition')$message);
   return(ifNotErr);}
 
 # to be used inside a function to get a list of unevaluated calls 
 # from all the ... args
-getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){
+getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){ # revdeps: colinfo,tblinfo
   out <- list();
   for(ii in setdiff(names(call),c(names(formals(fun)),''))){
     out[[ii]] <- call[[ii]]};
   out;
 }
 
+# Credit: http://conjugateprior.org/2015/06/identifying-the-os-from-r/
+get_os <- function(){ # nodeps
+  sysinf <- Sys.info()
+  if (!is.null(sysinf)){
+    os <- sysinf['sysname']
+    if (os == 'Darwin')
+      os <- "osx"
+  } else { ## mystery machine
+    os <- .Platform$OS.type
+    if (grepl("^darwin", R.version$os))
+      os <- "osx"
+    if (grepl("linux-gnu", R.version$os))
+      os <- "linux"
+  }
+  tolower(os)
+}
+
+
 systemwrapper <- function(cmd='',...,VERBOSE=getOption('sysverbose',T)
-                          ,CHECKFILES=c('files')){
+                          ,CHECKFILES=c('files')){ # nodeps
   args <- list(...); sysargs <- list();
   # separate out the args intended for system
   for(ii in intersect(names(args),names(formals(system)))){
@@ -261,6 +309,25 @@ git_merge <- function(which,fastfwd=getOption('git.fastfwd',F)
   system(cmd);}
 gmr <- git_merge;
 
+#' Delete and re-download git submodules if any exist.
+#'
+#' @param stopfile The name of a file which, if exists, will cause this function
+#'                 to exit without doing anything. Will silently return errors 
+#'                 from shell but will not throw an error.
+#'
+#' @return If successful, \code{0}, otherwise an error code.
+#' @export
+#'
+#' @examples
+#' 
+#' \dontrun{ git_subupd() }
+git_subupd <- function(stopfile='.developer'){if(!file.exists(stopfile)){
+  unlink(systemwrapper("git submodule --quiet foreach 'echo $path'"
+                       ,intern=TRUE,VERBOSE=FALSE));
+  systemwrapper('git submodule update --init --recursive --remote')} else {
+    message('Developer mode-- ignoring.'); return(0);
+  }};
+
 git_autoconf <- function(upstream=getOption('git.upstream'),...){
   # should only be run in an interactive context
   if(!'upstream' %in% system('git remote',intern=T) && !is.null(upstream)){
@@ -276,6 +343,7 @@ git_autoconf <- function(upstream=getOption('git.upstream'),...){
     .useremail <- paste0('"',readline(),'"');
     systemwrapper('git config --global user.email',.useremail)};
 }
+
 
 # By default incorporates upstream changes if they don't conflict with local 
 # changes but overwrites 
@@ -323,6 +391,45 @@ gup <- gitup <- git_getupstream;
 #' @examples git_ignore(c('*.csv','*.tsv'))
 git_ignore <- function(patterns,ignorepath='.',preamble='') {
   write(c(preamble,patterns),file.path(ignorepath,'.gitignore'),append=T)};
+
+#' Switch between ssh authentication and ssl authentication for a git repo.
+#' 
+#' A use-case for this is some environments that by default initialize projects
+#' as ssl/https (e.g. RStudio Cloud) but some users may prefer ssh 
+#' authentication. This easily converts between the two settings without having
+#' to remember the whole git command. Will silently return errors from shell but
+#' will not throw an error.
+#' 
+#' @param tossh If `TRUE`, will attempt to convert the remote.origin.url from 
+#'              https to ssh. Default: `TRUE`
+#' @param sshstr A string to use as the prefix for ssh connection. Optional, 
+#'               defaults to the values used by github.com
+#' @param sslstr A string to use as the prefix for the ssl connection. Optional,
+#'               defaults to the values used by github.com.
+#'
+#' @return Invisibly returns `0` or an error code.
+#'
+#' @examples
+#' \dontrun{
+#' # Convert from https://github.com/... to git@github.com:...
+#' git_ssh()
+#' 
+#' # Convert from git@github.com:... to https://github.com/...
+#' git_ssh(FALSE)
+#' 
+#' }
+git_ssh <- function(tossh=TRUE,sshstr='git@github.com:'
+                    ,sslstr='https://github.com/'){
+  currentorigin <- systemwrapper('git config remote.origin.url',intern=TRUE);
+  message('Current origin: ',currentorigin);
+  matchrepl <- if(tossh) c(sslstr,sshstr) else c(sshstr,sslstr);
+  matchrepl[1]<-paste0('^',matchrepl[1]);
+  neworigin <- gsub(matchrepl[1],matchrepl[2],currentorigin);
+  message('Setting origin to: ',neworigin);
+  systemwrapper('git config remote.origin.url',neworigin);
+  systemwrapper('git remote -v');
+}
+
 
 # TODO: git nagger
 
@@ -517,7 +624,7 @@ truthy.default <- function(xx,truewords=c('TRUE','true','Yes','T','Y','yes','y')
 truthy.data.frame <- function(xx,...) as.data.frame(lapply(xx,truthy,...));
 
 # table utilities -----------------------------------
-t_autoread <- function(file,...){
+t_autoread <- function(file,...){ #deps: getTryMsg
   # make sure prerequisite function exists
   if(!exists('tread')) {
     instrequire('devtools');
@@ -758,7 +865,7 @@ fs <- function(str,text=str,url=paste0('#',gsub('[^_a-z0-9]','-',tolower(str)))
                ,col_text='',match_col=c('varname','colname'),fs_reg=NULL
                ,retfun=cat
                #,fs_reg='fs_reg'
-               ,...){
+               ,...){ #WIP
   # if a data dictionary is specified use that instead of the default values 
   # for arguments where the user has not explicitly provided values (if there
   # is no data dictionary or if the data dictionary doesn't have those columns,
@@ -862,7 +969,7 @@ find_relpath <- function(file,paths=c('..','../..','.'),recursive=F
 # WARNING: if for some reason you have files lying around ending in
 # ".R.rdata" then the y will be removed as well! If you want to keep
 # them, rename them to something else or change the argument
-clear_cache <- function(pattern='*.R.rdata'){
+clear_cache <- function(pattern='*.R.rdata'){ # deprecated
   file.remove(list.files(pattern=pattern,recursive=T
                          ,full.names = T))};
 
