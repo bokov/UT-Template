@@ -730,19 +730,20 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
         ,"\nplease specify a 'sheet' argument")};
     xlargs <- args[intersect(names(args),names(formals(read_xls)))];
     xlargs$na <- na;
-    if(!'n_max' %in% names(xlargs)) xlargs$n_max <- Inf;
-    if(!'skip' %in% names(xlargs)) xlargs$skip <- 0;
-    n_max_orig <- xlargs$n_max; skip_orig <- xlargs$skip;
-    xlargs$n_max <- chunk;
+    # if(!'n_max' %in% names(xlargs)) xlargs$n_max <- Inf;
+    # if(!'skip' %in% names(xlargs)) xlargs$skip <- 0;
+    # n_max_orig <- xlargs$n_max; skip_orig <- xlargs$skip;
+    # xlargs$n_max <- chunk;
     message('About to read Excel file');
-    out <- rowsread <- do.call(reader,c(list(path=file),xlargs));
-    while(nrow(rowsread)>0 && nrow(out) < n_max_orig){
-      xlargs$skip <- xlargs$skip + chunk;
-      #browser();
-      rowsread <- do.call(reader,c(list(path=file,col_names=colnames(out)),xlargs));
-      out <- rbind(out,rowsread);
-      message('Read ',nrow(out),' rows');
-    }
+    #out <- rowsread <- do.call(reader,c(list(path=file),xlargs));
+    out <- do.call(reader,c(list(path=file),xlargs));
+    # while(nrow(rowsread)>0 && nrow(out) < n_max_orig){
+    #   xlargs$skip <- xlargs$skip + chunk;
+    #   #browser();
+    #   rowsread <- do.call(reader,c(list(path=file,col_names=colnames(out)),xlargs));
+    #   out <- rbind(out,rowsread);
+    #   message('Read ',nrow(out),' rows');
+    # }
     message('Fixing column names on Excel file');
     out <- fixnames(out);
     return(out)};
