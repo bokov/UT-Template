@@ -20,7 +20,8 @@ options('git.upstream','git@github.com:bokov/2019-FA-TSCI-5050');
 cwd <- getwd(); cwd;
 #' If `global.R` isn't found, try to find it
 if(!file.exists('functions.R')){
-  cwd <- getwd(); start <- normalizePath('..');
+  message('Attempting to track down global.R file...');
+  start <- normalizePath('..');
   .corefiles <- '(functions|global|dictionary|example_config).R';
   .candidatedirs <- unique(dirname(file.path(normalizePath('..')
                                              ,list.files(normalizePath('..')
@@ -173,7 +174,7 @@ urls <- list(
   # NAACCR data dictionary, section 10
   ,dict_naaccr='http://datadictionary.naaccr.org/?c=10'
   # TSCI 5050 website
-  ,git_site='https://github.com/bokov/2019-SP-TSCI-5050'
+  ,git_site='https://github.com/bokov/2019-FA-TSCI-5050'
   );
 #' RPubs keeps the actual content in an iframe, and this cool little 3-liner 
 #' gets the address of that iframe's target so in principle I can now construct
