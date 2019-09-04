@@ -324,7 +324,8 @@ gmr <- git_merge;
 #' \dontrun{ git_subupd() }
 git_subupd <- function(stopfile='.developer'){if(!file.exists(stopfile)){
   unlink(systemwrapper("git submodule --quiet foreach 'echo $path'"
-                       ,intern=TRUE,VERBOSE=FALSE));
+                       ,intern=TRUE,VERBOSE=FALSE)
+         ,recursive = TRUE,force = TRUE);
   systemwrapper('git submodule update --init --recursive --remote')} else {
     message('Developer mode-- ignoring.'); return(0);
   }};
