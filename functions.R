@@ -50,7 +50,8 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
   # Update the git submodules
   if(updatemodules) git_subupd();
   # if rstudioapi available, use it to restart the session
-  if(require(rstudioapi)) rstudioapi::restartSession(command);
+  if(require(rstudioapi) && rstudioapi::isAvailable()){
+    rstudioapi::restartSession(command)};
 }
 
 #' Append or replace attributes of any object in a pipeline-frindly way.
@@ -662,23 +663,15 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
                      ,fixnames=function(xx) {
                        setNames(xx,tolower(make.names(names(xx))))}
                      ,file_args=list(),...){
+  if(!file.exists(file)) stop(sprintf('File "%s" not found.'),file);
+  if(dir.exists(file)) stop(sprintf('"%s" is not a file, it\'s a directory.'),file);
   args <- list(...);
   # allow file_args to be overridden by ... args, while preserving
   # order of ... 
   for(ii in intersect(names(args),names(file_args))) file_args[[ii]] <- NULL;
+  xlformat <- format_from_signature(file);
   args <- c(file_args,args);
-  reader <- 'auto'
-  # check for Excel formats
-  sheets <- try(.Call('readxl_xlsx_sheets',PACKAGE='readxl',file),silent=T);
-  if(!is(sheets,'try-error')) reader <- 'read_xlsx' else{
-    sheets <- try(.Call('readxl_xls_sheets',PACKAGE='readxl',file),silent=T);
-    if(!is(sheets,'try-error')) reader <- 'read_xls';
-  }
-  if(!is(sheets,'try-error') && length(sheets)>1 && !'sheet' %in% names(args)){
-    warning(
-      "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
-      ,"\nReading in the first sheet. If you want a different one"
-      ,"\nplease specify a 'sheet' argument")};
+  reader <- if(!is.na(xlformat)) paste0('read_',xlformat) else 'auto';
   if(reader == 'auto' && nrow(enc<-guess_encoding(file))>0){
     # if it's a zip file, this unzips it and replaces the original file arg
     # with the temporary unzipped version
@@ -690,7 +683,7 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
                ,collapse=',')
         ,"\nReading in the first file. If you want a different one"
         ,"\nplease specify a 'sheet' argument");
-        unzfile <- unzfile[1]} else unzfile <- unzfile[args$sheet]};
+      unzfile <- unzfile[1]} else unzfile <- unzfile[args$sheet]};
     if(length(unzfile==1)){
       message('Reading unzipped file',basename(unzfile));
       file <- unzfile;}
@@ -721,9 +714,37 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
   }
   # try various binary formats
   if(reader %in% c('read_xls','read_xlsx')){
+    # check for Excel formats
+    message('checking sheets in workbook');
+    sheets <- readxl::excel_sheets(file);
+    # sheets <- try(.Call('readxl_xlsx_sheets',PACKAGE='readxl',file),silent=T);
+    # if(!is(sheets,'try-error')) reader <- 'read_xlsx' else{
+    #   sheets <- try(.Call('readxl_xls_sheets',PACKAGE='readxl',file),silent=T);
+    #   if(!is(sheets,'try-error')) reader <- 'read_xls';
+    # }
+    if(length(sheets)>1 && !'sheet' %in% names(args)){
+      warning(
+        "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
+        ,"\nReading in the first sheet. If you want a different one"
+        ,"\nplease specify a 'sheet' argument")};
     xlargs <- args[intersect(names(args),names(formals(read_xls)))];
     xlargs$na <- na;
-    return(fixnames(do.call(reader,c(list(path=file),xlargs))))};
+    if(!'n_max' %in% names(xlargs)) xlargs$n_max <- Inf;
+    if(!'skip' %in% names(xlargs)) xlargs$skip <- 0;
+    n_max_orig <- xlargs$n_max; skip_orig <- xlargs$skip;
+    xlargs$n_max <- chunk;
+    message('About to read Excel file');
+    out <- rowsread <- do.call(reader,c(list(path=file),xlargs));
+    while(nrow(rowsread)>0 && nrow(out) < n_max_orig){
+      xlargs$skip <- xlargs$skip + chunk;
+      #browser();
+      rowsread <- do.call(reader,c(list(path=file,col_names=colnames(out)),xlargs));
+      out <- rbind(out,rowsread);
+      message('Read ',nrow(out),' rows');
+    }
+    message('Fixing column names on Excel file');
+    out <- fixnames(out);
+    return(out)};
   
   # SPSS, SAS, and Stata
   # one of these has some error message that bubbles through despite silent=T
@@ -988,8 +1009,8 @@ load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
         # specified path if one is provided
         message(sprintf('Trying to initialize cache using script %s'
                         ,iiscript));
-        system(sprintf('R -e ".workdir<-\'%s\'; source(\'%s\',chdir=T)"'
-                       ,cachedir,iiscript));
+        .junk <- system(sprintf('R --no-restore -e ".workdir<-\'%s\'; source(\'%s\',chdir=T)"'
+                                ,cachedir,iiscript),intern = T);
         # again try to find a valid path to it
         iicached <- find_path(paste0(ii,'.rdata')
                               ,c(cachedir,scriptdir,fallbackdir));
