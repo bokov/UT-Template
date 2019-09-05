@@ -152,10 +152,6 @@ options(gitstamp_prod=F);
 pn <- 'patient_num';
 vn <- 'encounter_num';
 
-#' ## Optional: Wrap the readr functions for audit trail
-spec_delim <- function(xx,...) tread(xx,readr::spec_delim,...);
-read_delim <- function(xx,...) tread(xx,readr::read_delim,...);
-
 #+ echo=F
 # searchrep --------------------------------------------------------------------
 #' Certain data has text that you will always want to remove wherever it's.
