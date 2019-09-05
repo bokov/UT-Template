@@ -1,20 +1,12 @@
 # small utils ------------------------------------------------------------------
 
-# I'd rather not introduce a dependency for just one function, on the other
-# I trust Dr. Wickam & Co.'s code more than my own inexperienced stumblings so 
-# if coalesce is already available, I use that one.
-#  
-if(!exists('coalesce')){
-  coalesce <- function(...){
-    Reduce(function(xx,yy) ifelse(is.na(xx),yy,xx),list(...))}
-}
 
 #' This function takes a list of package names, loads them if they are
-#' available, otherwise attempts to install each one and then again 
+#' available, otherwise attempts to install each one and then again
 #' attempts to load it.
 instrequire <- function(pkgs # nodeps
                         ,quietly=TRUE
-                        # the dependencies argument is ignored and is only here 
+                        # the dependencies argument is ignored and is only here
                         # so that it doesn't end up in the '...'
                         ,dependencies=TRUE
                         ,repos=getOption('repos','https://cran.rstudio.com/')
@@ -66,13 +58,13 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
 #' @examples
 #' # Change an object's attribute
 #' with_attr(iris,list(class='list'))
-#' 
+#'
 #' # Create a new attribute for an object
 #' foo <- with_attr(LETTERS,list(comment='Hello world'))
 #' comment(foo)
 #' foo <- with_attr(foo,rep='One more comment.')
 #' comment(foo)
-#' 
+#'
 with_attrs<-function(xx,rep.attrs=list(),app.attrs=list()){ # nodeps
   attrs <- attributes(xx); if(is.null(attrs)) attrs<-list();
   for(ii in names(rep.attrs)) attrs[[ii]] <- rep.attrs[[ii]];
@@ -90,25 +82,6 @@ cm <- with_cm <- function(xx,comment=NULL,append=T # deps:with_attrs
   }
 }
 
-#' Take an object name \code{obj}, check to see if it  exists in environment \code{env}
-#' and if it does not, run \code{expression} \code{EXPR} and assign its result to \code{obj}
-#'
-#' @param obj   A \code{character} string (required) naming the variable in env
-#'   to which the results of running \code{EXPR} will be assigned.
-#' @param EXPR  An \code{expression} to execute and assign to the object named
-#'   by \code{obj} if it doesn't already exist.
-#' @param env   An \code{environment} to check for the existence of \code{obj}
-#'   and where to create it if it doesn't exist.
-#'
-#' @return Does not return anything.
-#'
-#' @examples `checkrun('dat3',{group_by(dat1,idn_mrn) %>% summarise_all(first)});`
-checkrun <- function(obj,EXPR,env=as.environment(-1)){
-  env<-env;
-  if(length(ls(env,all=T,pattern=obj))==0){
-    browser();
-  }
-}
 
 getCall.list <- getCall.data.frame <- getCall.gg <- function(xx) {attr(xx,'call')};
 
@@ -119,19 +92,19 @@ update.call <- function(xx,...){
   xx;
 }
 
-#' Stack a vector to form a matrix with repeating rows, with optional 
+#' Stack a vector to form a matrix with repeating rows, with optional
 #' column names and transformation
 #'
 #' @param  vv    A vector which will become the row of a matrix
 #' @param  nr    Number of (identical) rows this matrix will contain
-#' @param  trans An optional function that can take a matrix as its 
+#' @param  trans An optional function that can take a matrix as its
 #'              sole argument. Useful functions include `as.data.frame()`
 #'              `as_tibble()` and `as.table()`
 #' @return A matrix, unless the function specified in the `trans` argument
 #'         causes the output to be something else.
-#' @export 
+#' @export
 #'
-#' @examples 
+#' @examples
 #' vec2m(1:10,5);
 #' vec2m(1:10,5,tr=data.frame);
 #' vec2m(setNames(1:12,month.name),3);
@@ -155,41 +128,20 @@ fullargs <- function(syspar=sys.parent(),env=parent.frame(2L),expand.dots=TRUE){
 #' preserving their dimensions (obtained from the first argument of ...)
 
 # figure out how the current OS represents the top of its file system
-systemRootDir <- function(){ 
+systemRootDir <- function(){
   dir <- dirname(normalizePath('.'));
   newdir <- dirname(dir);
   while(dir!=newdir){dir<-newdir; newdir <- dirname(newdir)}
   return(newdir);
 }
 
-mprintf <- function(fmt,...,flattenmethod=1){ #WIP
-  dots <- list(...);
-  out<-dots[[1]];
-  # if factors not converted to characters, those cells will come out as NA
-  if(is.factor(out)) out <- as.character(out) else if(is.list(out)){
-    for(ii in seq_along(out)) if(is.factor(out[[ii]])) {
-      out[[ii]]<-as.character(out[[ii]])}}
-  if(is.null(nrow(out))) {
-    warning('Converting output to matrix. Might be errors.');
-    outnames<-names(out);
-    out <- t(matrix(out));
-    try(colnames(out)<-outnames);
-  }
-  for(ii in seq_along(dots)) dots[[ii]] <- c(if(flattenmethod==1) {
-    unlist(dots[[ii]])} else if(flattenmethod==2){
-      sapply(dots[[ii]],as.character)});
-  vals <- do.call(sprintf,c(fmt,dots));
-  for(ii in seq_len(nrow(out))) for(jj in seq_len(ncol(out))) {
-    out[ii,jj] <-matrix(vals,nrow=nrow(out))[ii,jj]};
-  out;
-  }
 
 # extract the error message of the argument
 getTryMsg <- function(xx,ifNotErr=xx){ # revdeps: t_autoread
   if(is(xx,'try-error')) return(attr(bla,'condition')$message);
   return(ifNotErr);}
 
-# to be used inside a function to get a list of unevaluated calls 
+# to be used inside a function to get a list of unevaluated calls
 # from all the ... args
 getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){ # revdeps: colinfo,tblinfo
   out <- list();
@@ -200,20 +152,17 @@ getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){ # revdeps:
 
 # Credit: http://conjugateprior.org/2015/06/identifying-the-os-from-r/
 get_os <- function(){ # nodeps
-  sysinf <- Sys.info()
+  sysinf <- Sys.info();
   if (!is.null(sysinf)){
-    os <- sysinf['sysname']
-    if (os == 'Darwin')
-      os <- "osx"
+    os <- sysinf['sysname'];
+    if (os == 'Darwin') os <- "osx";
   } else { ## mystery machine
-    os <- .Platform$OS.type
-    if (grepl("^darwin", R.version$os))
-      os <- "osx"
-    if (grepl("linux-gnu", R.version$os))
-      os <- "linux"
+    os <- .Platform$OS.type;
+    if (grepl("^darwin", R.version$os)) os <- "osx";
+    if (grepl("linux-gnu", R.version$os)) os <- "linux";
   }
-  tolower(os)
-}
+  tolower(os);
+};
 
 
 systemwrapper <- function(cmd='',...,VERBOSE=getOption('sysverbose',T)
@@ -233,8 +182,10 @@ systemwrapper <- function(cmd='',...,VERBOSE=getOption('sysverbose',T)
   return(do.call(system,c(command=cmd,sysargs)));
 }
 # git ----
+#' git checkout
 git_checkout <- function(which=getOption('git.workingbranch','master'),...){
   systemwrapper('git checkout',which,...)};
+
 gco <- git_checkout;
 
 git_commit <- function(files='-a',comment
@@ -245,12 +196,26 @@ git_commit <- function(files='-a',comment
   comment <- paste0('"',filenames,comment,'"');
   systemwrapper('git commit',files,'-m',comment,...);
   if(autopush) git_push();}
+
 gci <- git_commit;
 
-# List the files in the repo having a particular status
+#' List the files in the repo having a particular status
+#'
+#' Quoting from git documentation (\code{git help diff}):
+#' \emph{Select only files that are Added (A), Copied (C), Deleted (D),
+#' Modified (M), Renamed (R), have their type (i.e. regular file, symlink,
+#' submodule, ...) changed (T), are Unmerged (U), are Unknown (X), or have had
+#' their pairing Broken (B). Any combination of the filter characters (including
+#' none) can be used. When * (All-or-none) is added to the combination, all
+#' paths are selected if there is any file that matches other criteria in the
+#' comparison; if there is no file that matches other criteria, nothing is
+#' selected.}
+#'
+#' @param xx String containing one or more of A,C,D,M,R,T,U,X,B, or *
 git_diff_filter <- function(xx) {
   system(paste('git diff --name-only --diff-filter',xx),intern=T)};
 
+#' Nicely formatted and concise status of current git repo.
 git_status <- function(print=T
                        ,diff_filters=list(Added='A',Copied='C',Deleted='D'
                                           ,Modified='M',Renamed='R'
@@ -280,22 +245,33 @@ git_status <- function(print=T
   }
 gst <- git_status;
 
+#' List only the files currently being tracked by git
 git_lsfiles <- function(...) {systemwrapper('git ls-files',...)};
 
+#' Whatever other git functions that aren't explicitly implemented yet. Just put
+#' any combination of git arguments as arguments to this function, leaving out
+#' \code{git} itself.
 git_other <- function(...){systemwrapper('git',...)};
 git_ <- git_other;
 
+#' Make the specified file start getting tracked by the current git repository.
 git_add <- function(files,...){
   systemwrapper('git add',files=files,...)};
 gadd <- git_add;
 
+#' Rename a git file, so git knows you didn't delete it.
 git_rename <- function(from,to,...){systemwrapper('git rename',from,to,...)};
 
+#' Move a git file, so git knows you didn't delete it.
 git_move <- function(from,to,...) {systemwrapper('git mv',from,to,...)};
 
+#' Push committed changes to the origin (for example, but not necessarily,
+#' github.com)
 git_push <- function(...) {systemwrapper('git push',...)};
 gp <- git_push;
 
+#' Create a new branch \emph{and} check it out immediately. Optionally also
+#' push.
 git_newbranch <- function(branch,pushorigin=F,...){
   systemwrapper('git checkout -b',branch,...);
   if(pushorigin) systemwrapper('git push origin',branch);
@@ -313,14 +289,14 @@ gmr <- git_merge;
 #' Delete and re-download git submodules if any exist.
 #'
 #' @param stopfile The name of a file which, if exists, will cause this function
-#'                 to exit without doing anything. Will silently return errors 
+#'                 to exit without doing anything. Will silently return errors
 #'                 from shell but will not throw an error.
 #'
 #' @return If successful, \code{0}, otherwise an error code.
 #' @export
 #'
 #' @examples
-#' 
+#'
 #' \dontrun{ git_subupd() }
 git_subupd <- function(stopfile='.developer'){if(!file.exists(stopfile)){
   unlink(systemwrapper("git submodule --quiet foreach 'echo $path'"
@@ -330,6 +306,8 @@ git_subupd <- function(stopfile='.developer'){if(!file.exists(stopfile)){
     message('Developer mode-- ignoring.'); return(0);
   }};
 
+#' Automatically configure your global .gitconfig with your name and email
+#' (if not yet thus configured) so that git will allow you to commit changes
 git_autoconf <- function(upstream=getOption('git.upstream'),...){
   # should only be run in an interactive context
   if(!'upstream' %in% system('git remote',intern=T) && !is.null(upstream)){
@@ -347,34 +325,6 @@ git_autoconf <- function(upstream=getOption('git.upstream'),...){
 }
 
 
-# By default incorporates upstream changes if they don't conflict with local 
-# changes but overwrites 
-# set mergestrategy to 'ours' to resolve conflicts in favor of local changes
-# Or set it to '' to do whatever the default action is.
-# The ... args get passed to the merge command
-git_getupstream <- function(mergestrategy='theirs'
-                            ,message='Merge with upstream'
-                            ,fastfwd=getOption('git.fastfwd',F)
-                            ,upstrmbranch=getOption('git.upstrmbranch','master')
-                            ,localbranch=getOption('git.workingbranch','master')
-                            ,...){
-  git_autoconf();
-  systemwrapper('git fetch upstream');
-  git_checkout(which = localbranch);
-  upstreamaddress <- paste0('upstream/',upstrmbranch);
-  systemwrapper('git merge',upstreamaddress
-                ,if(!fastfwd) '--no-ff' else ''
-                ,if(mergestrategy!='') paste0('-X',mergestrategy) else ''
-                ,'-m',paste0('"',message,'"'),...);
-  result <- system('git diff --name-only --diff-filter=U',intern=T);
-  if(length(result)>0){
-    warning('Uh oh. There seem to be merge conflicts in the following files:\n'
-            ,paste(result,collapse=', '),'\nAborting merge.\n');
-    systemwrapper('git merge --abort')
-    stop('The merge you attempted to do will need to be sorted out manually outside of R. If you are doing this as part of a class, please ask your instructor for help.')};
-}
-gup <- gitup <- git_getupstream;
-
 
 #' Title: Add a pattern to a .gitignore file
 #'
@@ -383,7 +333,7 @@ gup <- gitup <- git_getupstream;
 #'                 you will have to edit .gitignore manually.
 #' @param ignorepath Path to .gitignore (you can have multiple ones)
 #'                   current directory by default.
-#' @param preamble What to put in the line/s before a set of ignore 
+#' @param preamble What to put in the line/s before a set of ignore
 #'                 patterns. Empty line by default, set to NULL if you
 #'                 want to not skip a line.
 #'
@@ -395,30 +345,31 @@ git_ignore <- function(patterns,ignorepath='.',preamble='') {
   write(c(preamble,patterns),file.path(ignorepath,'.gitignore'),append=T)};
 
 #' Switch between ssh authentication and ssl authentication for a git repo.
-#' 
+#'
 #' A use-case for this is some environments that by default initialize projects
-#' as ssl/https (e.g. RStudio Cloud) but some users may prefer ssh 
+#' as ssl/https (e.g. RStudio Cloud) but some users may prefer ssh
 #' authentication. This easily converts between the two settings without having
 #' to remember the whole git command. Will silently return errors from shell but
 #' will not throw an error.
-#' 
-#' @param tossh If `TRUE`, will attempt to convert the remote.origin.url from 
+#'
+#' @param tossh If `TRUE`, will attempt to convert the remote.origin.url from
 #'              https to ssh. Default: `TRUE`
-#' @param sshstr A string to use as the prefix for ssh connection. Optional, 
+#' @param sshstr A string to use as the prefix for ssh connection. Optional,
 #'               defaults to the values used by github.com
 #' @param sslstr A string to use as the prefix for the ssl connection. Optional,
 #'               defaults to the values used by github.com.
 #'
 #' @return Invisibly returns `0` or an error code.
 #'
+#' @export
 #' @examples
 #' \dontrun{
 #' # Convert from https://github.com/... to git@github.com:...
 #' git_ssh()
-#' 
+#'
 #' # Convert from git@github.com:... to https://github.com/...
 #' git_ssh(FALSE)
-#' 
+#'
 #' }
 git_ssh <- function(tossh=TRUE,sshstr='git@github.com:'
                     ,sslstr='https://github.com/'){
@@ -436,123 +387,9 @@ git_ssh <- function(tossh=TRUE,sshstr='git@github.com:'
 # TODO: git nagger
 
 # renaming and remapping  ----
-#' A function to re-order and/or rename the levels of a factor or 
-#' vector with optional cleanup.
-#'
-#' @param xx            a vector... if not a factor will be converted to 
-#'                      one
-#' @param lookuptable   matrix-like objects where the first column will
-#'                      be what to rename FROM and the second, what to
-#'                      rename TO. If there is only one column or if it's
-#'                      not matrix-like, the levels will be set to these
-#'                      values in the order they occur in `lookuptable`.
-#'                      If there are duplicated values in the first column
-#'                      only the first one gets used, with a warning.
-#'                      Duplicate values in the second column are allowed 
-#'                      and are a feature.
-#' @param reorder       Whether or not to change the order of the factor
-#'                      levels to match those in `lookuptable`. True by
-#'                      default (logical). By default is `TRUE`, is set to
-#'                      `FALSE` will try to preserve the original order of
-#'                      the levels.
-#' @param unmatched     Scalar value. If equal to -1 and `reorder` is `TRUE` 
-#'                      then unmatched original levels are prepended to the 
-#'                      matched ones in their original order of occurence. If 
-#'                      equal to 1, then appended in their original order of 
-#'                      occurrence. If some other value, then they are all 
-#'                      binned in one level of that name. The (empty) new ones 
-#'                      always go to the end.
-#' @param droplevels    Drop unused levels from the output factor (logical)
-#' @param case          Option to normalize case (`'asis'`` leaves it as it was)
-#'                      before attempting to match to `lookuptable`. One value 
-#'                      only
-#' @param mapnato       If the original levels contain `NA`s, what they should 
-#'                      be instead. They stay `NA` by default.
-#' @param remove        Vector of strings to remove from all level names (can
-#'                      be regexps) before trying to match to `lookuptable`.
-#' @param otherfun      A user-specified function to make further changes to
-#'                      the original level names before trying to match and
-#'                      replace them. Should expect to get the output from
-#'                      `levels(xx)` as its only argument.
-#' @param spec_mapper   A constrained lookup table specification that includes
-#'                      a column named `varname` in addition to the two columns
-#'                      that will become `from` and `to`. This is for extra
-#'                      convenience in projects that use such a table. If you
-#'                      aren't working on a project that already follows this
-#'                      convention, you should ignore this parameter.
-#' @param var           What value should be in the `varname` column of 
-#'                      `spec_mapper`
-#' @param fromto        Which columns in the `spec_mapper` should become the 
-#'                      `from` and `to` columns, respectively. Vector of length
-#'                      2, is `c('code','label')` by default.
-factorclean <- function(xx,lookuptable,reorder=T,unmatched=1
-                        ,droplevels=F,case=c('asis','lower','upper')
-                        ,mapnato=NA,remove='"',otherfun=identity
-                        ,spec_mapper,var,fromto=c('code','label')){
-  if(!is.factor(xx)) xx <- factor(xx);
-  lvls <- levels(xx);
-  lvls <- switch (match.arg(case)
-                   ,asis=identity,lower=tolower,upper=toupper)(lvls) %>% 
-    submulti(cbind(remove,'')) %>% otherfun;
-  levels(xx) <- lvls;
-  # Check to see if spec_mapper available.
-  if(!missing(spec_mapper)&&!missing(var)){
-    lookuptable <- subset(spec_mapper,varname==var)[,fromto];
-  }
-  # The assumption is that if you're passing just a vector or something like
-  # it, then you want to leave the level names as-is and just want to change
-  # the ordering
-  if(is.null(ncol(lookuptable))) lookuptable <- cbind(lookuptable,lookuptable);
-  # can never be too sure what kind of things with rows and columns are getting 
-  # passed, so coerce this to a plain old vanilla data.frame
-  lookuptable <- data.frame(lookuptable[,1:2]) %>% setNames(c('from','to'));
-  if(length(unique(lookuptable[,1]))!=nrow(lookuptable)) {
-    lookuptable <- lookuptable[match(unique(lookuptable$from),lookuptable$from),];
-    warning("You have duplicate values in the first (or only) column of your 'lookuptable' argument. Only the first instances of each will be kept");
-  }
-  if(reorder){
-    extras <- data.frame(from=lvls,to=NA,stringsAsFactors = F) %>%
-      subset(!from %in% lookuptable$from);
-    lookupfinal <- if(unmatched==-1) rbind(extras,lookuptable) else {
-      rbind(lookuptable,extras)};
-  } else {
-    lookupfinal <- left_join(data.frame(from=lvls,stringsAsFactors = F)
-                             ,lookuptable,by='from') %>% 
-      rbind(subset(lookuptable,!from%in%lvls));
-  }
-  # if the 'unmatched' parameter has the special value of -1 or 1, leave the 
-  # original names for the unmatched levels. Otherwise assign them to the bin
-  # this parameter specifies
-  lookupfinal$to <- with(lookupfinal,if(unmatched %in% c(-1,1)){
-    ifelse(is.na(to),from,to)} else {ifelse(is.na(to),unmatched,to)});
-  # Warning: not yet tested on xx's that are already factors and have an NA
-  # level
-  lookupfinal$to <- with(lookupfinal,ifelse(is.na(from),mapnato,to));
-  out <- factor(xx,levels=lookupfinal$from);
-  levels(out) <- lookupfinal$to;
-  if(droplevels) droplevels(out) else out;
-}
 
 
-#' into the specified existing or new level. That level is listed last
-#' in the resulting factor.
-#' @param xx A \code{vector} (required).
-#' @param topn \code{numeric} for the top how many levels to keep (optional, default =4)
-#' @param binto \code{character} which new or existing level to dump the other values in
-cl_bintail <- function(xx,topn=4,binto='other'){
-  if(!is.factor(xx)) xx <- factor(xx);
-  counts <- sort(table(xx),decreasing = T);
-  if(is.numeric(binto)) binto <- names(counts)[binto];
-  keep <- setdiff(names(counts)[1:min(length(counts),topn)],binto);
-  droplevels(
-    factor(
-      ifelse(
-        xx %in% keep, as.character(xx), binto
-        ),levels=c(keep,binto)));
-}
-
-
-#' Take a character vector and perform multiple search-replace 
+#' Take a character vector and perform multiple search-replace
 #' operations on it.
 #' @param xx A \code{vector} of type \code{character} (required)
 #' @param searchrep A \code{matrix} with two columns of type \code{character} (required). The left column is the pattern and the right, the replacement.
@@ -590,7 +427,7 @@ submulti <- function(xx,searchrep
 }
 
 #' Take a data.frame or character vector and a vector of grep targets and return
-#' the values that match (for data.frame, column names that match). If no 
+#' the values that match (for data.frame, column names that match). If no
 #' patterns given just returns the names
 #' @param xx A \code{data.frame} or character vector (required)
 #' @param patterns A character vector of regexp targets to be OR-ed
@@ -599,31 +436,7 @@ grepor <- function(xx,patterns='.') {
   grep(paste0(patterns,collapse='|'),xx,val=T);
 }
 
-#' Usage: `xx<-mapnames(xx,lookup)` where lookup is a named character vector
-#' the names of the elements in the character vector are what you are renaming
-#' things TO and the values are what needs to be matched, i.e. what renaming things
-#' FROM. If you set namesonly=T then it just returns the names, not the original
-#' object.
-mapnames<-function(xx,lookup,namesonly=F,...){
-  xnames <- names(xx);
-  idxmatch <- na.omit(match(xnames,lookup));
-  newnames <- names(lookup)[idxmatch];
-  if(namesonly) return(newnames);
-  names(xx)[xnames %in% lookup] <- newnames;
-  xx;
-}
 
-#' Example of using R methods dispatch
-#' 
-#' The actual usage is: `truthy(foo)` and `truthy()` itself figures
-#' out which method to actually dispatch.
-truthy <- function(xx,...) UseMethod('truthy');
-truthy.logical <- function(xx,...) xx;
-truthy.factor <- function(xx,...) truthy.default(as.character(xx),...);
-truthy.numeric <- function(xx,...) xx>0;
-truthy.default <- function(xx,truewords=c('TRUE','true','Yes','T','Y','yes','y')
-                           ,...) xx %in% truewords;
-truthy.data.frame <- function(xx,...) as.data.frame(lapply(xx,truthy,...));
 
 # table utilities -----------------------------------
 t_autoread <- function(file,...){ #deps: getTryMsg
@@ -631,34 +444,17 @@ t_autoread <- function(file,...){ #deps: getTryMsg
   if(!exists('tread')) {
     instrequire('devtools');
     .result <- try({
-      devtools::install_github('bokov/trailR',ref='integration'); 
+      devtools::install_github('bokov/trailR',ref='integration');
       library(trailR);});
     if(is(.result,'try-error')) return(getTryMsg(.result));
   }
   do.call(tread,c(list(file,readfun=autoread),list(...)));
 }
 
-guess_skip <- function(file,reader=read_csv,args=list(),skip_max=20
-                       ,n_max=100
-                       ,dynVarNames='^[0-9]+[_.]?[0-9]*$|__[0-9]+$|^[VX][0-9]+$'
-                       ,...){
-  args$nrows <- args$n_max <- n_max;
-  if('skip' %in% names(args)) args[['skip']] <- NULL;
-  # remove illegal arguments
-  if(!'...' %in% .argnames <- names(formals(reader))){
-    for(ii in names(args)) if(!ii %in% .argnames) args[[ii]] <- NULL;
-  } else args <- c(args,...);
-  args <- c(file,args);
-  .test <- sapply(seq(0,skip_max),function(xx){
-    do.call(reader,c(args,skip=xx));});
-  .nDynVarNames <- sapply(.test,function(xx) sum(grepl(dynVarNames,names(xx))));
-  if(sum(min(.nDynVarNames)==.nDynVarNames)==1){
-    return(which.min(.nDynVarNames)-1)};
-  .charCols <- sapply(.test,function(xx) all(sapply(xx,class=='character')));
-  browser();
-}
 
 #' Autoguessing function for reading most common data formats
+#'
+#' @importFrom readxl read_xls read_xlsx excel_sheets
 autoread <- function(file,na=c('','.','(null)','NULL','NA')
                      # change this to identity to do nothing to names
                      ,fixnames=function(xx) {
@@ -668,9 +464,9 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
   if(dir.exists(file)) stop(sprintf('"%s" is not a file, it\'s a directory.'),file);
   args <- list(...);
   # allow file_args to be overridden by ... args, while preserving
-  # order of ... 
+  # order of ...
   for(ii in intersect(names(args),names(file_args))) file_args[[ii]] <- NULL;
-  xlformat <- format_from_signature(file);
+  xlformat <- readxl:::format_from_signature(file);
   args <- c(file_args,args);
   reader <- if(!is.na(xlformat)) paste0('read_',xlformat) else 'auto';
   if(reader == 'auto' && nrow(enc<-guess_encoding(file))>0){
@@ -690,9 +486,11 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
       file <- unzfile;}
     message('Trying to read as a text file with fread()')
     # try to read as a delimited file via fread
-    txargs <- args[intersect(names(args),names(formals(fread)))];
+    txargs <- args[intersect(names(args)
+                             ,names(formals(data.table::fread)))];
     txargs$na.strings <- na;
-    out <- try(as_tibble(do.call(fread,c(list(input=file),txargs)))
+    out <- try(tibble::as_tibble(do.call(data.table::fread
+                                         ,c(list(input=file),txargs)))
                ,silent = T);
     if(!is(out,'try-error')) return(fixnames(out));
     message('fread() failed! Falling back on read_delim');
@@ -723,12 +521,14 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     #   sheets <- try(.Call('readxl_xls_sheets',PACKAGE='readxl',file),silent=T);
     #   if(!is(sheets,'try-error')) reader <- 'read_xls';
     # }
+    #xlreader <- get(reader,envir=as.environment('package:readxl'));
     if(length(sheets)>1 && !'sheet' %in% names(args)){
       warning(
         "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
         ,"\nReading in the first sheet. If you want a different one"
         ,"\nplease specify a 'sheet' argument")};
-    xlargs <- args[intersect(names(args),names(formals(read_xls)))];
+    xlargs <- args[intersect(names(args)
+                             ,names(formals(eval(as.name(reader)))))];
     xlargs$na <- na;
     # if(!'n_max' %in% names(xlargs)) xlargs$n_max <- Inf;
     # if(!'skip' %in% names(xlargs)) xlargs$skip <- 0;
@@ -747,12 +547,13 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     message('Fixing column names on Excel file');
     out <- fixnames(out);
     return(out)};
-  
+
   # SPSS, SAS, and Stata
   # one of these has some error message that bubbles through despite silent=T
   # so we sink before the for loop, unsink if one of the readers succeeds...
   sink(tempfile());
-  for(ff in c(read_sav,read_por,read_dta,read_xpt)){
+  for(ff in c(haven::read_sav,haven::read_por,haven::read_dta
+              ,haven::read_xpt)){
       {
         if(!is(try(out <- ff(file),silent=T),'try-error')){
           sink();
@@ -795,9 +596,9 @@ tblinfo <- function(dat,custom_stats=alist()
                     ,info_cols=alist(
                        c_empty=frc_missing==1,c_uninformative=n_nonmissing<2
                       ,c_ordinal=uniquevals<10&isnum
-                      # The below is an experiment with automatically adding 
+                      # The below is an experiment with automatically adding
                       # explanatory labels to columns. Problem is, it's
-                      # invisible to pander() and in View() is creates wide 
+                      # invisible to pander() and in View() is creates wide
                       # columns that get truncated anyway
                       # ,c_ordinal=with_attrs(uniquevals<10&isnum
                       #                       ,list(label=strwrap('Is this a numeric column that is candidate for converting to discrete values?',prefix='\n')))
@@ -806,7 +607,7 @@ tblinfo <- function(dat,custom_stats=alist()
                       ,c_factor=uniquevals<20&!isnum
                       ,c_complex=!(c_ordinal|c_tm|c_tf|c_numeric|c_factor)
                     ),...){
-  out <- bind_rows(sapply(dat,colinfo,custom_stats=custom_stats,simplify=F)
+  out <- dplyr::bind_rows(sapply(dat,colinfo,custom_stats=custom_stats,simplify=F)
                    ,.id='column');
   for(ii in names(info_cols)) out[[ii]] <- eval(info_cols[[ii]],envir=out);
   dots <- getParentDots();
@@ -815,112 +616,8 @@ tblinfo <- function(dat,custom_stats=alist()
   return(out);
 }
 
-#' Returns a vector of column names that contain data elements of a particular type
-#' as specified by the user: "integer","POSIXct" "POSIXt", "numeric", "character", 
-#' "factor" and "logical". 
-vartype <- function(dat, ctype) {
-  xx <- unlist(sapply(dat, class));
-  idx <- which(xx %in% ctype);
-  res <- names(xx)[idx];
-  return(res)
-}
-
-#' Not yet ready:
-#' 
-# rebuild_dct <- function(dat=dat00,rawdct=dctfile_raw,tpldct=dctfile_tpl,debuglev=0
-#                         ,tread_fun=read_csv,na='',searchrep=c()){
-#   out <- names(dat)[1:8] %>% 
-#     tibble(colname=.,colname_long=.,rule='demographics') %>% 
-#     rbind(tread(rawdct,tread_fun,na = na));
-#   if(length(na.omit(out$colname))!=length(unique(na.omit(out$colname)))){
-#     stop('Invalid data dictionary! Duplicate values in colname column');}
-#   out$colname <- tolower(out$colname);
-#   #dct0 <- subset(dct0,dct0$colname %in% names(dat00));
-#   shared <- intersect(names(dat),out$colname);
-#   out[out$colname %in% shared,'class'] <- lapply(dat00[,shared],class) %>% sapply(head,1);
-#   out$colsuffix <- gsub('^v[0-9]{3}','',out$colname);
-#   if(debug>0) .outbak <- out;
-#   # end debug
-#   out <- left_join(out,tpl<-tread(tpldct,tread_fun,na=na)
-#                    ,by=c('colsuffix','colname_long'));
-#   # debug
-#   if(debug>0){
-#     if(nrow(out)!=nrow(.outbak)) 
-#       stop('Number of rows changed in dct0 after join');
-#     if(!identical(out$colname,.outbak$colname)) 
-#       stop('colname values changed in dct0 after join');
-#   }
-#   # find the dynamic named vars in tpl
-#   outappend <- subset(tpl,!varname %in% out$varname);
-#   # make sure same columns exist
-#   outappend[,setdiff(names(out),names(outappend))] <- NA;
-#   out <- rbind(out,outappend[,names(out)]);
-#   # end debug
-#   out$c_all <- TRUE;
-#   # replace strings if needed
-#   if(!missing(searchrep)) {
-#     out$colname_long <- submulti(out$colname_long,searchrep);}
-#   return(out);
-# }
-
-
 
 # string hacking ---------------------------------------------------------------
-#' Fancy Span (or any other special formatting of strings)
-#' 
-fs <- function(str,text=str,url=paste0('#',gsub('[^_a-z0-9]','-',tolower(str)))
-               ,tooltip=alist(str),class='fl'
-               # %1 = text, %2 = url, %3 = class, %4 = tooltip
-               # TODO: %5 = which position 'str' occupies in fs_reg if 
-               #       applicable and if not found, append 'str'
-               ,template='[%1$s]: %2$s "%4$s"\n'
-               # Turns out that the below template will generate links, but they
-               # only render properly for HTML output because pandoc doesn't 
-               # interpret them. However, if we use the markdown implicit link
-               # format (https://pandoc.org/MANUAL.html#reference-links) we 
-               # don't have to wrap links in anything, but we _can_ use fs()
-               # with the new template default above to generate a block of 
-               # link info all at once in the end. No longer a point in using
-               # the fs_reg feature for this case, the missing links will be
-               # easy to spot in the output hopefully
-               #,template="<a href='%2$s' class='%3$s' title='%4$s'>%1$s</a>"
-               ,dct=dct0,col_tooltip='colname_long',col_class='',col_url=''
-               ,col_text='',match_col=c('varname','colname'),fs_reg=NULL
-               ,retfun=cat
-               #,fs_reg='fs_reg'
-               ,...){ #WIP
-  # if a data dictionary is specified use that instead of the default values 
-  # for arguments where the user has not explicitly provided values (if there
-  # is no data dictionary or if the data dictionary doesn't have those columns,
-  # fall back on the default values)
-  if(is.data.frame(dct) && 
-     length(match_col<-intersect(match_col,names(dct)))>0){
-    dctinfo <- dct[match(str,do.call(coalesce,dct[,match_col])),];
-     #!all(is.na(dctinfo <- dct[which(dct[[match_col]]==str)[1],]))){
-    if(missing(tooltip) #&& 
-      #length(dct_tooltip<-na.omit(dctinfo[[col_tooltip]]))==1) {
-      #tooltip <- dct_tooltip;}
-    ){tooltip <- do.call(coalesce,c(dctinfo[,col_tooltip],tooltip,''))};
-    if(missing(text) && 
-       length(dct_text<-na.omit(c(dctinfo[[col_text]],NA)))==1) {
-      text <- dct_text;}
-    if(missing(url) && 
-       length(dct_url<-na.omit(c(dctinfo[[col_url]],NA)))==1) {
-      url <- dct_url;}
-    if(missing(class) && 
-       length(dct_class<-na.omit(c(dctinfo[[col_class]],NA)))==1) {
-      class <- dct_class;}
-  } else dctinfo <- data.frame(NA);
-  out <- sprintf(rep(template,nrow(dctinfo)),text,url,class,tooltip,...);
-  # register each unique str called by fs in a global option specified by 
-  # fs_register
-  if(!is.null(fs_reg)) {
-    dbg<-try(do.call(options,setNames(list(union(getOption(fs_reg),str))
-                                      ,fs_reg)));
-    if(is(dbg,'try-error')) browser();
-    }
-  retfun(out);
-}
 
 # Project Utilities ----
 personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
@@ -950,7 +647,7 @@ personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                  ,author # Author, ditto
                  ,format(date,'%d/%m/%Y') # Date, ditto
                  # packages (optional)
-                 ,paste('c(',paste0("'",packages,"'",collapse=','),')') 
+                 ,paste('c(',paste0("'",packages,"'",collapse=','),')')
                  ,file # ...so the file knows it's own name!
                  # dependencies on previously run files
                  ,paste('c(',paste0("'",deps,"'",collapse=','),')')
@@ -988,14 +685,6 @@ find_relpath <- function(file,paths=c('..','../..','.'),recursive=F
   return(c());
 }
 
-# remove all the cached files created by this project
-# WARNING: if for some reason you have files lying around ending in
-# ".R.rdata" then the y will be removed as well! If you want to keep
-# them, rename them to something else or change the argument
-clear_cache <- function(pattern='*.R.rdata'){ # deprecated
-  file.remove(list.files(pattern=pattern,recursive=T
-                         ,full.names = T))};
-
 load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                       ,fallbackdir='scripts',envir=parent.frame()){
   if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
@@ -1007,7 +696,7 @@ load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                                    ,c(cachedir,scriptdir,fallbackdir)))){
       # run that script and create one
       if(!is.null(iiscript<-find_path(ii,c(scriptdir,fallbackdir)))){
-        # TODO: modify all files to write their cached results to a user 
+        # TODO: modify all files to write their cached results to a user
         # specified path if one is provided
         message(sprintf('Trying to initialize cache using script %s'
                         ,iiscript));
