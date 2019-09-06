@@ -83,16 +83,16 @@ instrequire(
     #,'Matrix'
     
     # data manipulation & piping. 
-    # 'tools' is used by trailR.R
+    # 'tools' was used by trailR.R
     # 'LaF' is used for fast and powerful reading of text files.
-    ,'readr','dplyr','magrittr','tools','LaF' ,'openxlsx'
-    ,'tibble','readxl','data.table','haven'
+    #,'readr','dplyr','magrittr','LaF','tools','openxlsx'
+    #,'tibble','readxl','data.table','haven'
     # dummies breaks categoric variables into individual dummy variables
     ,'dummies'
     #,'lubridate'
     
     # plotting
-    ,'ggfortify','survminer'
+    #,'ggfortify','survminer'
     #,'ggplot2','grid','GGally','heatmap3','gridExtra','scales'
     
     # string manipulation
