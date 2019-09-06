@@ -165,44 +165,5 @@ globalsearchrep <- rbind(
   c('\\[[0-9,]+ facts; [0-9,]+ patients\\]','')
 );
 
-#+ echo=F
-# urls -------------------------------------------------------------------------
-urls <- list(
-  # recent version of compiled document online
-  # (not relevant to TSCI 5050 except as an example)
-   exp_rpubs='https://rpubs.com/bokov/kidneycancer'
-  # NAACCR data dictionary, section 10
-  ,dict_naaccr='http://datadictionary.naaccr.org/?c=10'
-  # TSCI 5050 website
-  ,git_site='https://github.com/bokov/2019-FA-TSCI-5050'
-  );
-#' RPubs keeps the actual content in an iframe, and this cool little 3-liner 
-#' gets the address of that iframe's target so in principle I can now construct
-#' links with targets to other documents I published previously, starting with
-#' the most recent version of this document.
-urls$exp_raw <- getURL(urls$exp_rpubs) %>% 
-  htmlParse %>% xpathApply('//iframe') %>% `[[`(1) %>% xmlAttrs() %>% 
-  paste0('https:',.);
-#+ echo=F
-# fs_templates -----------------------------------------------------------------
-#' templates for `fs()` ... note that the actual values inserted depend on 
-#' the other arguments of `fs()` and the columns of the data dictionary
-fstmplts <- list(
-  # [n_ddiag]: #n_ddiag "0390 Date of Diagnosis"
-  linkref="[%1$s]: %2$s \"%4$s\"\n"  
-  # [`n_ddiag`][#n_ddiag]
-  ,link_varname="[`%1$s`][%2$s]"
-  # [`0390 Date of Diagnosis`][#n_ddiag]
-  ,link_colnamelong="[`%4$s`][%2$s]"
-  # `0390 Date of Diagnosis`
-  ,code_colnamelong="`%4$s`"
-  # 0390 Date of Diagnosis
-  ,plain_colnamelong="%4$s"
-  # note2self spans, each linking to a ticket
-  ,n2s=paste0('(',urls$git_tix,'%1$s){#gh%1$s .note2self custom-style="note2self"}')
-  # NCDB style variable definitions
-  ,ncdb_def=paste(':::::{%2$s .vardef custom-style=\"vardef\"}',' %4$s :'
-                  ,'  ~ %1$s\n\n',sep='\n\n')
-);
 #+ echo=F,eval=F
 c()
