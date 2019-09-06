@@ -32,7 +32,7 @@ if(!file.exists('functions.R')){
                                      ,'your instructor for help. Either way, '
                                      ,'you might need to clone a fresh copy of '
                                      ,'this project.');
-  if(length(.candidatedirs)==1){
+  if(length(.candidatedirs)>1){
     message('You are not in the correct directory. Here is/are one/s that '
             ,'might be correct. Please type in the directory to which you wish '
             ,'to switch to or hit [enter] to accept the first item on this '
@@ -46,13 +46,16 @@ if(!file.exists('functions.R')){
   }
 }
 #+ echo=F
-# local_functionas ----
+# local_functions ----
 #' ## Load some local functions
 #+ warning=FALSE, message=FALSE
-source('./functions.R');
+if(file.exists('functions.R')) source('functions.R');
 # Now that we are managing trailR as a standalone package, need devtools
-instrequire('devtools');
+if(!require('devtools')){
+  install.packages('devtools',dependencies=TRUE
+                   ,repos=getOption('repos','https://cran.rstudio.com'))};
 devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
+devtools::install_github('bokov/tidbits',ref='integration'); library(tidbits);
 #+ echo=F
 # libs -------------------------------------------------------------------------
 #' ## Libraries
