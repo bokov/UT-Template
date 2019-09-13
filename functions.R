@@ -454,11 +454,33 @@ t_autoread <- function(file,...){ #deps: getTryMsg
 
 #' Autoguessing function for reading most common data formats
 #'
+#' @param file       The name of a file you want to read into R
+#' @param na         Vector of strings that should get translated to `NA` upon 
+#'                   import. Optional, defaults to a reasonable set of values.
+#' @param fixnames   A function that normalizes column names after importing the
+#'                   data. If you want to leave them untouched, set this equal
+#'                   to `identity()`. Optional, defaults to making them lower
+#'                   case, R-legal, and unique.
+#' @param file_args  This is to easily pass project-level or script-level
+#'                   defaults in the form of an `alist()` to whichever lucky 
+#'                   function ends up winning the contest to read your file. 
+#'                   Only names that match the formal arguments of your function
+#'                   will be used, the rest will be silently ignored. This way,
+#'                   you can pass some `read_xlsx` specific arguments without 
+#'                   worrying that something else will intercept them and error
+#'                   out.
+#' @param ...        Additional named arguments passed to this function will 
+#'                   be added to those in `file_args` overriding any that have 
+#'                   matching names.
+#' 
+#' @return A `tibble`
 #' @importFrom readxl read_xls read_xlsx excel_sheets
+#' 
 autoread <- function(file,na=c('','.','(null)','NULL','NA')
                      # change this to identity to do nothing to names
                      ,fixnames=function(xx) {
-                       setNames(xx,tolower(make.names(names(xx))))}
+                       setNames(xx,tolower(make.names(names(xx),unique = TRUE)))
+                       }
                      ,file_args=list(),...){
   if(!file.exists(file)) stop(sprintf('File "%s" not found.'),file);
   if(dir.exists(file)) stop(sprintf('"%s" is not a file, it\'s a directory.'),file);
@@ -704,18 +726,31 @@ load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
 }
 
 
-#' Search for 
+#' Search for all sample datasets in all currently installed packages.
 #'
-#' @return
+#' A goal of this function is to be able to quickly filter through currently
+#' available datasets and find ones that meet your needs so you're not using
+#' the same old `mtcars` and `iris` for everything.
+#'
+#' @return A `data.frame` with columns `Package`: name of the package that 
+#'         provides that dataset, `LibPath`: path where that package is 
+#'         currently installed, `Item`: the name of the dataset, `Title`: a
+#'         brief description of the dataset, `Class`: the class of the object
+#'         listed in `Item` (if multiple classes, they are delimited by 
+#'         semicolons),`IsDataFrame`: whether or not the object listed in 
+#'         `Item` inherits from `data.frame`,`NumberNonNumeric`: number of
+#'         columns that are not `numeric` (`character`, `factor`, `POSIXct`, 
+#'         etc.),`Rows`: number of rows in the `Item` if applicable,`Cols`: 
+#'         number of columns in the dataset in the `Item` if applicable.
 #' @export
 #'
-#' @examples
+#' @examples allTheData()
 allTheData <- function(verbose=T){
   # get all datasets provided by all loaded packages
   dt = as.data.frame(data(package = .packages(all.available = TRUE))$results
                      ,stringsAsFactors=F);
   # df = data.frame?, nnn = number not numeric, nr/nc = nrows, ncols
-  dt[,c('class','df','nnn','nr','nc')] <- NA;
+  dt[,c('Class','IsDataFrame','NumberNonNumeric','Rows','Cols')] <- NA;
   for(ii in unique(dt$Package)){
     for(jj in subset(dt,Package==ii)$Item) {
       path <- paste0(ii,'::',jj);
