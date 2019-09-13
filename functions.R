@@ -1,5 +1,9 @@
 # small utils ------------------------------------------------------------------
 
+#' @importFrom magrittr %>%
+#' @export
+magrittr::`%>%`
+
 
 #' This function takes a list of package names, loads them if they are
 #' available, otherwise attempts to install each one and then again
@@ -13,7 +17,7 @@ instrequire <- function(pkgs # nodeps
                         ,...){
   pkgs_installed <- sapply(pkgs,require,character.only=TRUE);
   if(length(pkgs_needed <- names(pkgs_installed[!pkgs_installed]))>0){
-    install.packages(pkgs_needed,repos=repos,dependencies = TRUE,...);
+    utils::install.packages(pkgs_needed,repos=repos,dependencies = TRUE,...);
     pkgs_final <- sapply(pkgs_needed,require,character.only=TRUE
                          ,quietly=quietly);
     if(!all(pkgs_final)){
@@ -34,13 +38,13 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
                             ,'function), don\'t expect any code that you put '
                             ,'after it to work!');
   # remove cached files
-  file.remove(list.files(pattern=removepatt,all=T,recursive=T,full.names = T));
+  file.remove(list.files(pattern=removepatt,all.files=TRUE,recursive=TRUE,full.names = TRUE));
   # Update the git submodules
   if(updatemodules) git_subupd();
   # clear out calling environment
-  rm(list=ls(all=all,envir = envir),envir = envir);
+  rm(list=ls(all.names=all,envir = envir),envir = envir);
   # also global environment if specified
-  if(cleanglobal) rm(list=ls(all=all,envir=.GlobalEnv),envir = .GlobalEnv);
+  if(cleanglobal) rm(list=ls(all.names=all,envir=.GlobalEnv),envir = .GlobalEnv);
   # if rstudioapi available, use it to restart the session
   if(require(rstudioapi) && rstudioapi::isAvailable()){
     rstudioapi::restartSession(command)};
@@ -57,12 +61,12 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
 #'
 #' @examples
 #' # Change an object's attribute
-#' with_attr(iris,list(class='list'))
+#' with_attrs(iris,list(class='list'))
 #'
 #' # Create a new attribute for an object
-#' foo <- with_attr(LETTERS,list(comment='Hello world'))
+#' foo <- with_attrs(LETTERS,list(comment='Hello world'))
 #' comment(foo)
-#' foo <- with_attr(foo,rep='One more comment.')
+#' foo <- with_attrs(foo,rep='One more comment.')
 #' comment(foo)
 #'
 with_attrs<-function(xx,rep.attrs=list(),app.attrs=list()){ # nodeps
@@ -83,13 +87,13 @@ cm <- with_cm <- function(xx,comment=NULL,append=T # deps:with_attrs
 }
 
 
-getCall.list <- getCall.data.frame <- getCall.gg <- function(xx) {attr(xx,'call')};
+getCall.list <- getCall.data.frame <- getCall.gg <- function(x,...) {attr(x,'call')};
 
 # why not update calls?
-update.call <- function(xx,...){
+update.call <- function(object,...){
   dots <- list(...);
-  for(ii in names(dots)) xx[[ii]] <- dots[[ii]];
-  xx;
+  for(ii in names(dots)) object[[ii]] <- dots[[ii]];
+  object;
 }
 
 #' Stack a vector to form a matrix with repeating rows, with optional
@@ -138,7 +142,7 @@ systemRootDir <- function(){
 
 # extract the error message of the argument
 getTryMsg <- function(xx,ifNotErr=xx){ # revdeps: t_autoread
-  if(is(xx,'try-error')) return(attr(bla,'condition')$message);
+  if(methods::is(xx,'try-error')) return(attr(xx,'condition')$message);
   return(ifNotErr);}
 
 # to be used inside a function to get a list of unevaluated calls
@@ -433,20 +437,25 @@ submulti <- function(xx,searchrep
 #' @param patterns A character vector of regexp targets to be OR-ed
 grepor <- function(xx,patterns='.') {
   if(is.list(xx)) xx <-names(xx);
-  grep(paste0(patterns,collapse='|'),xx,val=T);
+  grep(paste0(patterns,collapse='|'),xx,value=TRUE);
 }
 
 
 
 # table utilities -----------------------------------
+
+#' Extends trailR package with integrated universal (almost) file reader
+#' 
+#' @param file Any of the common delimited file formats
+#' 
+#' @export
 t_autoread <- function(file,...){ #deps: getTryMsg
   # make sure prerequisite function exists
   if(!exists('tread')) {
-    instrequire('devtools');
     .result <- try({
       devtools::install_github('bokov/trailR',ref='integration');
-      library(trailR);});
-    if(is(.result,'try-error')) return(getTryMsg(.result));
+      library(trailR)});
+    if(methods::is(.result,'try-error')) return(getTryMsg(.result));
   }
   do.call(tread,c(list(file,readfun=autoread),list(...)));
 }
@@ -482,8 +491,7 @@ t_autoread <- function(file,...){ #deps: getTryMsg
 autoread <- function(file,na=c('','.','(null)','NULL','NA')
                      # change this to identity to do nothing to names
                      ,fixnames=function(xx) {
-                       setNames(xx,tolower(make.names(names(xx),unique = TRUE)))
-                       }
+                       stats::setNames(xx,tolower(make.names(names(xx),unique = TRUE)))}
                      ,file_args=list(),...){
   if(!file.exists(file)) stop(sprintf('File "%s" not found.'),file);
   if(dir.exists(file)) stop(sprintf('"%s" is not a file, it\'s a directory.'),file);
@@ -491,13 +499,13 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
   # allow file_args to be overridden by ... args, while preserving
   # order of ...
   for(ii in intersect(names(args),names(file_args))) file_args[[ii]] <- NULL;
-  xlformat <- readxl:::format_from_signature(file);
+  xlformat <- readxl::format_from_signature(file);
   args <- c(file_args,args);
   reader <- if(!is.na(xlformat)) paste0('read_',xlformat) else 'auto';
-  if(reader == 'auto' && nrow(enc<-guess_encoding(file))>0){
+  if(reader == 'auto' && nrow(enc<-readr::guess_encoding(file))>0){
     # if it's a zip file, this unzips it and replaces the original file arg
     # with the temporary unzipped version
-    unzfile <- suppressWarnings(unzip(file,exdir = tempfile("autoread")));
+    unzfile <- suppressWarnings(utils::unzip(file,exdir = tempfile("autoread")));
     if(length(unzfile)>1){ if(!'sheet' %in% names(args)){
       warning(
         "\nMultiple files found in ",file,":\n"
@@ -517,22 +525,22 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     out <- try(tibble::as_tibble(do.call(data.table::fread
                                          ,c(list(input=file),txargs)))
                ,silent = T);
-    if(!is(out,'try-error')) return(fixnames(out));
+    if(!methods::is(out,'try-error')) return(fixnames(out));
     message('fread() failed! Falling back on read_delim');
-    txargs <- args[intersect(names(args),names(formals(read_delim)))];
+    txargs <- args[intersect(names(args),names(formals(readr::read_delim)))];
     txargs$na <- na;
     txargs$delim <- '\t';
     suppressMessages(out <- try({
       problems<-problems(oo<-do.call(readr::read_delim,c(list(file=file)
                                                          ,txargs)));
       oo},silent=T));
-    if(!is(out,'try-error') && ncol(out)>1) return(fixnames(out)) else out_tab <- out;
+    if(!methods::is(out,'try-error') && ncol(out)>1) return(fixnames(out)) else out_tab <- out;
     txargs$delim <- ',';
     suppressMessages(out <- try({
       problems<-problems(oo<-do.call(readr::read_delim,c(list(file=file)
                                                          ,txargs)));
       oo},silent=T));
-    if(!is(out,'try-error')) return(fixnames(out));
+    if(!methods::is(out,'try-error')) return(fixnames(out));
     cat('\nGuessed encoding:\n');print(enc);
     stop(attr(out,'condition')$message);
   }
@@ -562,7 +570,7 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
   for(ff in c(haven::read_sav,haven::read_por,haven::read_dta,haven::read_sas
               ,haven::read_xpt)){
       {
-        if(!is(try(out <- ff(file),silent=T),'try-error')){
+        if(!methods::is(try(out <- ff(file),silent=T),'try-error')){
           sink();
           return(fixnames(out))}}
   }
@@ -576,7 +584,7 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
 #' Sumarize a table column
 colinfo <- function(col,custom_stats=alist(),...){
   nn <- length(col);
-  nona <- na.omit(col);
+  nona <- stats::na.omit(col);
   isna <- is.na(col);
   coltab <- table(nona);
   out <- list(class=paste0(class(col),collapse=':')
@@ -662,7 +670,7 @@ personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                  ,path_to_global[1]
   );
   write(out,file);
-  if(notebook) spin(file,knit=F);
+  if(notebook) knitr::spin(file,knit=F);
 }
 
 find_path <- function(file,paths=c('.','..')){
@@ -693,7 +701,8 @@ find_relpath <- function(file,paths=c('..','../..','.'),recursive=F
 }
 
 load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
-                      ,fallbackdir='scripts',envir=parent.frame()){
+                      ,fallbackdir='scripts',envir=parent.frame()
+                      ,loadfn=if(exists('tload')) tload else load ){
   if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
   # what objects got loaded by this function
   loadedobj=c();
@@ -721,7 +730,7 @@ load_deps <- function(deps,scriptdir=getwd(),cachedir=scriptdir
       stop(sprintf('The cached file for %s could not be found',iiscript));
       # otherwise, the cached .rdata now exists one way or another, load it
     } else {
-      loadedobj <- union(loadedobj,tload(iicached,envir=envir));
+      loadedobj <- union(loadedobj,loadfn(iicached,envir=envir));
       message(sprintf('Loaded data for %s from %s',ii,iicached));
       };
   }
