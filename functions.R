@@ -453,6 +453,9 @@ t_autoread <- function(file,...){ #deps: getTryMsg
 
 
 #' Autoguessing function for reading most common data formats
+#' 
+#' Supported so far are: xls, xlsx, csv and most other delimited text formats,
+#' SPSS, Stata, and SAS. 
 #'
 #' @param file       The name of a file you want to read into R
 #' @param na         Vector of strings that should get translated to `NA` upon 
