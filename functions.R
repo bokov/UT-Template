@@ -47,7 +47,7 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
   # also global environment if specified
   if(cleanglobal) rm(list=ls(all.names=all,envir=.GlobalEnv),envir = .GlobalEnv);
   # if rstudioapi available, use it to restart the session
-  if(requireNamespace(rstudioapi) && rstudioapi::isAvailable()){
+  if(requireNamespace('rstudioapi') && rstudioapi::isAvailable()){
     rstudioapi::restartSession(command)};
 }
 
@@ -452,7 +452,7 @@ grepor <- function(xx,patterns='.') {
 #' @export
 t_autoread <- function(file,...){ #deps: getTryMsg
   # make sure prerequisite function exists
-  if(requireNamespace(trailR)){
+  if(requireNamespace('trailR')){
     do.call(trailR::tread,c(list(file,readfun=autoread),list(...)))} else {
       stop("The 't_autoread()' only works if the trailR package is installed")
     }};
