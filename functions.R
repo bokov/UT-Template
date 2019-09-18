@@ -28,8 +28,12 @@ instrequire <- function(pkgs # nodeps
   };
 }
 
-clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:git_subupd
+clean_slate <- function(command="auto",removepatt='^\\.RData$|*.R\\.rdata$' 
                         ,all=TRUE,cleanglobal=TRUE
+                        ,packages=c('base')
+                        ,urlsource=c('https://raw.githubusercontent.com/bokov/UT-Template/master/functions.R')
+                        ,localsource=c('scripts/functions.R','functions.R')
+                        ,silent=TRUE
                         ,updatemodules=!file.exists('.developer')
                         ,envir=parent.frame()){
   if(!interactive()) warning('This function is intended to run in an '
@@ -39,19 +43,37 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
                             ,'function), don\'t expect any code that you put '
                             ,'after it to work!');
   # remove cached files
-  file.remove(list.files(pattern=removepatt,all.files=TRUE,recursive=TRUE,full.names = TRUE));
+  file.remove(list.files(pattern=removepatt,all.files=TRUE
+                         ,recursive=TRUE,full.names = TRUE));
   # Update the git submodules
   if(updatemodules) git_subupd();
+  # Put together command to run after restart.
+  if(command=='auto'){
+    cmdtext <- sprintf("for(ii in c('%s')){
+                           suppressWarnings(try(require(ii,character.only=TRUE)
+                              ,silent=%s))}; 
+                        for(ii in c('%s')){
+                           suppressWarnings(try(source(ii),silent=%s))}; 
+                         rm(ii);"
+                       ,paste(packages,collapse="', '"),silent
+                       ,paste(c(urlsource,localsource),collapse="', '"),silent);
+    command <- parse(text=cmdtext);}
   # clear out calling environment
   rm(list=ls(all.names=all,envir = envir),envir = envir);
   # also global environment if specified
   if(cleanglobal) rm(list=ls(all.names=all,envir=.GlobalEnv),envir = .GlobalEnv);
+  # unload packages
+  for(ii in grep('^package:',search(),value=TRUE)){
+    if(!ii %in% c('package:utils','package:methods','package:base'
+                  ,'package:datasets','package:grDevices','package:stats'
+                  ,'package:graphics')){
+      try(detach(ii,unload=TRUE,force=TRUE,character.only = TRUE),silent=TRUE)}};
   # if rstudioapi available, use it to restart the session
   if(requireNamespace('rstudioapi') && rstudioapi::isAvailable()){
     rstudioapi::restartSession(command)};
 }
 
-#' Append or replace attributes of any object in a pipeline-frindly way.
+#' Append or replace attributes of any object in a pipeline-friendly way.
 #'
 #' @param xx        Object whose attributes to modify and then return the object
 #' @param rep.attrs Named list of attributes to create or replace
