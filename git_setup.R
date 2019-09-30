@@ -43,7 +43,7 @@ if(!file.exists('.gitmodules')){
 if(!file.exists('.developer')){
   unlink(system("git submodule --quiet foreach 'echo $path'",intern=T)
        ,recursive = T,force = T)};
-system('git upd');
+system('git upd', intern = TRUE);
 
 #if(dir.exists('scripts/hooks')) file.copy();
 #else warning('
