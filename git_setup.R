@@ -50,4 +50,6 @@ system('git upd');
 #  This script should be run in a directory that has a "scripts" subdirectory.
 #  Cannot find that, so not installing git hooks');
 
+if(file.exists('scripts/bootstrap.Rprofile')) file.copy('scripts/bootstrap.Rprofile','.Rprofile');
+
 c()
