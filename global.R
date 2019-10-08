@@ -13,7 +13,6 @@
 # orient_paths ----
 #' ## Figure out where we are and set the upstream repository
 #' 
-if(!exists('.workdir')) .workdir <- '.';
 #' Upstream repo
 options('git.upstream','git@github.com:bokov/2019-FA-TSCI-5050');
 #' get current working directory
