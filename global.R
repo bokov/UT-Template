@@ -108,7 +108,6 @@ instrequire(
 #enableJIT(3);
 #+ echo=F
 # config ----
-
 #' ## Set variables that can get overridden by `config.R` if 
 #' applicable (to avoid error messages if you don't have them in
 #' your `config.R`)
@@ -128,32 +127,34 @@ source(.configpath);
 #' is already done in config.R)
 file_args$skip <- n_skip;
 #+ echo=F
-# vars -------------------------------------------------------------------------
+# vars ----
 #' ## Set generic variables
 #' 
-#' That is to say, variables which can be set without reference to the data and
-#' do not take a lot of time to do.
+#' That is to say, variables which can be set without reference to the data 
+#' and do not take a lot of time to do.
 #' 
+#' ## Set variables that may vary from one script to another, if they are 
+#' not already set in the calling script
+if(!exists('.debug')) .debug <- 0;
+if(!exists('.projpackages')) .projpackages <- c('');
+if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
+if(!exists('.deps')) .deps <- c('');
+if(!exists('.workdir')) .workdir <- dirname(.configpath);
 #' data dictionary template-- metadata that should persist accross multiple 
 #' versions of the data and data dictionary
 dctfile_tpl <- 'datadictionary_static.csv';
 #' checked-in file, with added rows and columns, ready-to-use FOR THIS DATASET
 #' if it doesn't exist, it will get created in data.R
 dctfile <- paste0('dct_',basename(inputdata));
-#' This is the file that lists levels of discrete variables and what each listed
-#' level should be renamed to.
+#' This is the file that lists levels of discrete variables and what each
+#' listed level should be renamed to.
 levels_map_file <- 'levels_map.csv';
 #' random seed
 project_seed <- 20190108;
 options(gitstamp_prod=F);
-#' patient and encounter numbers (you won't necessarily have these in your data)
-#' If your data has a patient number and that column is not named `patient_num` 
-#' change it here as appropriate.
-pn <- 'patient_num';
-vn <- 'encounter_num';
 
 #+ echo=F
-# searchrep --------------------------------------------------------------------
+# searchrep ----
 #' Certain data has text that you will always want to remove wherever it's.
 #' This is the place for it. You can leave the current value as a placeholder
 #' for now because it's unlikely to show up in your own dataset.
@@ -162,43 +163,21 @@ globalsearchrep <- rbind(
 );
 
 #+ echo=F
-# urls -------------------------------------------------------------------------
+# urls ----
 urls <- list(
-  # recent version of compiled document online
-  # (not relevant to TSCI 5050 except as an example)
-   exp_rpubs='https://rpubs.com/bokov/kidneycancer'
-  # NAACCR data dictionary, section 10
-  ,dict_naaccr='http://datadictionary.naaccr.org/?c=10'
   # TSCI 5050 website
-  ,git_site='https://github.com/bokov/2019-FA-TSCI-5050'
+  git_site='https://github.com/bokov/2019-FA-TSCI-5050'
   );
-#' RPubs keeps the actual content in an iframe, and this cool little 3-liner 
-#' gets the address of that iframe's target so in principle I can now construct
-#' links with targets to other documents I published previously, starting with
-#' the most recent version of this document.
-urls$exp_raw <- getURL(urls$exp_rpubs) %>% 
-  htmlParse %>% xpathApply('//iframe') %>% `[[`(1) %>% xmlAttrs() %>% 
-  paste0('https:',.);
-#+ echo=F
-# fs_templates -----------------------------------------------------------------
-#' templates for `fs()` ... note that the actual values inserted depend on 
-#' the other arguments of `fs()` and the columns of the data dictionary
-fstmplts <- list(
-  # [n_ddiag]: #n_ddiag "0390 Date of Diagnosis"
-  linkref="[%1$s]: %2$s \"%4$s\"\n"  
-  # [`n_ddiag`][#n_ddiag]
-  ,link_varname="[`%1$s`][%2$s]"
-  # [`0390 Date of Diagnosis`][#n_ddiag]
-  ,link_colnamelong="[`%4$s`][%2$s]"
-  # `0390 Date of Diagnosis`
-  ,code_colnamelong="`%4$s`"
-  # 0390 Date of Diagnosis
-  ,plain_colnamelong="%4$s"
-  # note2self spans, each linking to a ticket
-  ,n2s=paste0('(',urls$git_tix,'%1$s){#gh%1$s .note2self custom-style="note2self"}')
-  # NCDB style variable definitions
-  ,ncdb_def=paste(':::::{%2$s .vardef custom-style=\"vardef\"}',' %4$s :'
-                  ,'  ~ %1$s\n\n',sep='\n\n')
-);
+
 #+ echo=F,eval=F
+# script-specific packages ----
+if(length(setdiff(.projpackages,'') > 0)) instrequire(.projpackages);
+# start logging ----
+tself(scriptname=.currentscript);
+# run scripts on which this one depends ----
+# if any that have not been cached yet
+setwd(.workdir);
+.loadedobjects <- load_deps(.deps,cachedir = .workdir);
+# files already existing ----
+.origfiles <- ls(all=T);
 c()

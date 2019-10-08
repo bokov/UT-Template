@@ -8,9 +8,11 @@
 #+ message=F,echo=F
 # init ----
 debug <- 0;
+message('Trying to source global.R *******************************************')
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .currentscript <- parent.frame(2)$ofile;
+message('Done sourcing global.R *******************************************')
 if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
 tself(scriptname=.currentscript);
 #' Saving original file-list so we don't keep exporting functions and 
@@ -22,14 +24,9 @@ if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 #+ echo=F
 # read dat00 ----
 #' generic read function which auto-guesses file formats:
+message('About to autoread');
 dat00 <- t_autoread(inputdata,file_args=file_args);
-
-#' ## Optional: patient number
-#' 
-#' If you patient number variable (see `global.R`) is a number, force it to be
-#' treated as character rather than an integer to avoid missing values due to it 
-#' being too large
-if(pn %in% names(dat00)) dat00[[pn]] <- as.character(dat00[[pn]]);
+message('Done autoread');
 
 #+ echo=F
 # make data dictionary ----
@@ -49,6 +46,7 @@ dct0 <- tblinfo(dat00);
 #' ## Save all the processed data to an rdata file 
 #' 
 #' ...which includes the audit trail
+message('tsave ****************************************')
 suppressWarnings(tsave(file=file.path(.workdir
                                       ,paste0(basename(.currentscript)
                                               ,'.rdata'))
