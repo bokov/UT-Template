@@ -8,11 +8,9 @@
 #+ message=F,echo=F
 # init ----
 debug <- 0;
-message('Trying to source global.R *******************************************')
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .currentscript <- parent.frame(2)$ofile;
-message('Done sourcing global.R *******************************************')
 if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
 tself(scriptname=.currentscript);
 #' Saving original file-list so we don't keep exporting functions and 
@@ -46,7 +44,6 @@ dct0 <- tblinfo(dat00);
 #' ## Save all the processed data to an rdata file 
 #' 
 #' ...which includes the audit trail
-message('tsave ****************************************')
 suppressWarnings(tsave(file=file.path(.workdir
                                       ,paste0(basename(.currentscript)
                                               ,'.rdata'))
