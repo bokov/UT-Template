@@ -43,11 +43,13 @@ if(!file.exists('.gitmodules')){
 if(!file.exists('.developer')){
   unlink(system("git submodule --quiet foreach 'echo $path'",intern=T)
        ,recursive = T,force = T)};
-system('git upd');
+system('git upd', intern = TRUE);
 
 #if(dir.exists('scripts/hooks')) file.copy();
 #else warning('
 #  This script should be run in a directory that has a "scripts" subdirectory.
 #  Cannot find that, so not installing git hooks');
+
+if(file.exists('scripts/bootstrap.Rprofile')) file.copy('scripts/bootstrap.Rprofile','.Rprofile');
 
 c()
