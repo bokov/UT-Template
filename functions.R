@@ -58,7 +58,7 @@ isfileyaml <- function(file,...){
   isTRUE(sum(!headers) %% sum(headers) == 0)
 }
 
-try_import <- function(file,which,
+try_import <- function(file,which=1,
                        trytext=c("xml","html","r","json","pzfx"),
                        trybin=c("dbf","dta","rda","rds","sas7bdat","sav","xls",
                                 "xpt","matlab","fst","feather"),
@@ -68,8 +68,8 @@ try_import <- function(file,which,
   if(!is(out,'try-error')) return(out)
   # zip formats
   switch(c(isfilezip(file,return_ziptype = TRUE),'NOTZIP')[1],
-         MSO = out<-import(file=file,which=which,format='xlsx',...),
-         OO = out<-import(file=file,which=which,format='ods',...),
+         MSO = out<-.try_formats(file,which,formats='xlsx',verbose=verbose,...),
+         OO = out<-.try_formats(file,which,formats='ods',verbose=verbose,...),
          ZIP = c(),
          NOTZIP = c()
   )
