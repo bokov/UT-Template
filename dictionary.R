@@ -23,7 +23,7 @@ if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 # read dat00 ----
 #' generic read function which auto-guesses file formats:
 message('About to autoread');
-dat00 <- try_import(inputdata,file_args=file_args);
+dat00 <- try_import(inputdata);
 message('Done autoread, starting data dictionary');
 #+ echo=F
 # make data dictionary ----
