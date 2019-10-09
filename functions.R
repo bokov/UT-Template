@@ -67,10 +67,11 @@ try_import <- function(file,which,
   out <- try(import(file = file, which = which, ...),silent=TRUE)
   if(!is(out,'try-error')) return(out)
   # zip formats
-  switch(isfilezip(file,return_ziptype = TRUE),
+  switch(c(isfilezip(file,return_ziptype = TRUE),'NOTZIP')[1],
          MSO = out<-import(file=file,which=which,format='xlsx',...),
          OO = out<-import(file=file,which=which,format='ods',...),
-         ZIP = c()
+         ZIP = c(),
+         NOTZIP = c()
   )
   if(!is(out,'try-error')) return(out)
   # try text file methods
