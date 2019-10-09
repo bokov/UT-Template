@@ -55,6 +55,7 @@ if(!require('devtools')){
                    ,repos=getOption('repos','https://cran.rstudio.com'))};
 devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
 devtools::install_github('bokov/tidbits',ref='integration'); library(tidbits);
+devtools::install_github('bokov/rio',ref='master'); library(rio);
 #+ echo=F
 # libs -------------------------------------------------------------------------
 #' ## Libraries
