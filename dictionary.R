@@ -38,7 +38,7 @@ if(!file.exists(file.path(.workdir,'varmap.csv'))){
                                          ,stringsAsFactors = FALSE)));
   write.csv(map0,file.path(.workdir,'varmap.csv'),row.names = FALSE);
 } else {
-  map0 <- t_autoread(file.path(.workdir,'varmap.csv'));
+  map0 <- try_import(file.path(.workdir,'varmap.csv'));
 }
 dct0$column <- make.unique(unlist(submulti(dct0$column,map0
                                            ,method='startsends')));
