@@ -144,6 +144,8 @@ if(!exists('.projpackages')) .projpackages <- c('');
 if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
 if(!exists('.deps')) .deps <- c('');
 if(!exists('.workdir')) .workdir <- dirname(.configpath);
+
+options(tb.retcol='column');
 #' data dictionary template-- metadata that should persist accross multiple 
 #' versions of the data and data dictionary
 dctfile_tpl <- 'datadictionary_static.csv';
