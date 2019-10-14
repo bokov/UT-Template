@@ -33,7 +33,7 @@ message('Done creating data dictionary, starting variable mapping');
 #' The `varmap.csv` file is for renaming variables. Create
 #' a 'no-change' starter version if one doesn't already exist
 if(!file.exists(file.path(.workdir,'varmap.csv'))){
-  map0 <- as_tibble(with(dct0,data.frame(origname=column,varname=column
+  map0 <- tibble::as_tibble(with(dct0,data.frame(origname=column,varname=column
                                          ,dispname=column,comments=NA
                                          ,stringsAsFactors = FALSE)));
   write.csv(map0,file.path(.workdir,'varmap.csv'),row.names = FALSE);
