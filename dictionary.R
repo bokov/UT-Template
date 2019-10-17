@@ -19,31 +19,31 @@ tself(scriptname=.currentscript);
 # read student pre-run script if it exists ----
 if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 
-#+ echo=F
+#+ echo=FALSE,message=FALSE
 # read dat00 ----
 #' generic read function which auto-guesses file formats:
-dat00 <- t_autoread(inputdata,file_args=file_args);
-
-#' ## Optional: patient number
-#' 
-#' If you patient number variable (see `global.R`) is a number, force it to be
-#' treated as character rather than an integer to avoid missing values due to it 
-#' being too large
-if(pn %in% names(dat00)) dat00[[pn]] <- as.character(dat00[[pn]]);
-
+message('About to autoread');
+dat00 <- try_import(inputdata);
+message('Done autoread, starting data dictionary');
 #+ echo=F
 # make data dictionary ----
 #' ## Create the data dictionary
 dct0 <- tblinfo(dat00);
-
-#+ echo=F
-# a few dat00 hacks ----
-#' ## Raw Data Ops
-#' 
-#' Since you're messing around with the raw data anyway, if there is anything 
-#' you will need later which does not depend on the processing steps in the
-#' `data.R` script, you might as well get it out of the way in this section
-
+message('Done creating data dictionary, starting variable mapping');
+#' The `varmap.csv` file is for renaming variables. Create
+#' a 'no-change' starter version if one doesn't already exist
+if(!file.exists(file.path(.workdir,'varmap.csv'))){
+  map0 <- tibble::as_tibble(with(dct0,data.frame(origname=column,varname=column
+                                         ,dispname=column,comments=NA
+                                         ,stringsAsFactors = FALSE)));
+  write.csv(map0,file.path(.workdir,'varmap.csv'),row.names = FALSE);
+} else {
+  map0 <- try_import(file.path(.workdir,'varmap.csv'));
+}
+dct0$column <- make.unique(unlist(submulti(dct0$column,map0
+                                           ,method='startsends')));
+names(dat00) <-dct0$column;
+message('Done variable mapping');
 #+ echo=F
 # save out ----
 #' ## Save all the processed data to an rdata file 
