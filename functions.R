@@ -4,10 +4,10 @@
 #'
 #' @param filename Path to the file
 #' @param maxsize  Maximum number of bytes to read
-#' @param textbytes Which characters are used by normal (though not necessarily 
+#' @param textbytes Which characters are used by normal (though not necessarily
 #'                  just ASCII) text. To detect just ASCII, the following value
 #'                  can be used: `as.raw(c(7:16,18,19,32:127))`
-#' @param tf       If `TRUE` (default) simply return `TRUE` when `filename` 
+#' @param tf       If `TRUE` (default) simply return `TRUE` when `filename`
 #'                 references a text-only file and `FALSE` otherwise. If set to
 #'                 `FALSE` then returns the "non text" bytes found in the file.
 #'
@@ -18,7 +18,7 @@
 #' export(iris,"iris.yml")
 #' isfiletext("iris.yml")
 #' ## TRUE
-#' 
+#'
 #' export(iris,"iris.sav")
 #' isfiletext("iris.sav")
 #' ## FALSE
@@ -107,43 +107,5 @@ try_import <- function(file,which=1,
       break}
     } else break}
   return(out)
-}
-
-#' Returns a list of column names from the data dictionary for which the column
-#' named in the first argument is true. The first arg can be either a string or 
-#' a name. The second must be a data.frame
-#'
-#' @param var        Either a string or a name, of a column in `dictionary`
-#' @param dat        An optional data.frame, to constrain which rows of the 
-#'                   'dictionary' object get used
-#' @param retcol     Which column to return-- by default the same as used for 'matchcol'
-#' @param dictionary A 'data.frame' that is used as a data dictionary. It must at 
-#'                   minimum contain a column of column-names for the dataset for
-#'                   which it is a data dictionary ('matchcol') and one or more 
-#'                   columns each representing a _group_ of columns in the dataset, 
-#'                   such that a TRUE or T value means the column whose name is 
-#'                   the value of 'matchcol' is the name of a column in the data
-#'                   that belongs to the group defined by the grouping column.
-#'                   These grouping columns are what the argument 'var' is
-#'                   supposed to refer to. We will use the convention that grouping
-#'                   column names begin with 'c_' but this convention is not 
-#'                   (currently) enforced programmatically.
-v <- function(var,dat
-              ,retcol=getOption('tb.retcol','column')
-              ,dictionary=get('dct0')
-              ,asname=F) {
-  # convenience function: if forgot what column names are available, call with
-  # no arguments and they will be listed
-  if(missing(var)) return(names(dictionary));
-  # support both standard or non-standard evaluation
-  var<-as.character(substitute(var));
-  # TODO: Think about what to do when nothing matches... not necessarily an error
-  #       condition, might just be something to warn about and move on.
-  out <- unique(as.vector(na.omit(unlist(dictionary[dictionary[[var]],retcol]))));
-  if(!is(try(cnames<-colnames(dat),silent = T),'try-error')&&length(cnames)>0) {
-    out <- out[out%in%cnames];}
-  if(asname) out <- lapply(out,as.name);
-  #return(unname(out));
-  return(out);
 }
 
