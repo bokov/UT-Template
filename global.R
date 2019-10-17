@@ -183,7 +183,7 @@ tself(scriptname=.currentscript);
 # run scripts on which this one depends ----
 # if any that have not been cached yet
 setwd(.workdir);
-.loadedobjects <- load_deps(.deps,cachedir = .workdir);
+.loadedobjects <- tidbits:::load_deps(.deps,cachedir = .workdir);
 # files already existing ----
 .origfiles <- ls(all=T);
 c()
