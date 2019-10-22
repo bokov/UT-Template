@@ -156,7 +156,7 @@ dctfile <- paste0('dct_',basename(inputdata));
 #' listed level should be renamed to.
 levels_map_file <- 'levels_map.csv';
 #' random seed
-if(!exists('project_seed'))project_seed <- 20190108;
+if(!exists('project_seed')) project_seed <- 20190108;
 options(gitstamp_prod=getOption('gitstamp_prod',FALSE));
 
 #+ echo=F
