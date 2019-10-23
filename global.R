@@ -131,6 +131,12 @@ if(file.exists(.configlocalpath <- file.path(dirname(.configpath)
                                              ,'config.local.R'))){
   source(.configlocalpath,chdir=TRUE);
 }
+inputdata <- tidbits:::find_relpath(localdata);
+if(length(inputdata)>1){
+  warning('Several candidate files found:\n',paste0(inputdata,collapse='\n')
+          ,'Will use ',inputdata[1]);
+  inputdata <- inputdata[1]};
+
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
