@@ -126,7 +126,11 @@ if(is.null(.configpath)){
        ,'local computer, back up your config.R to some local location outside '
        ,'this repository, and then try running this script again.')};
 
-source(.configpath);
+source(.configpath,chdir = TRUE);
+if(file.exists(.configlocalpath <- file.path(dirname(.configpath)
+                                             ,'config.local.R'))){
+  source(.configlocalpath,chdir=TRUE);
+}
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
