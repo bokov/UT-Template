@@ -131,7 +131,7 @@ if(file.exists(.configlocalpath <- file.path(dirname(.configpath)
                                              ,'config.local.R'))){
   source(.configlocalpath,chdir=TRUE);
 }
-inputdata <- tidbits:::find_relpath(localdata);
+inputdata <- tidbits:::find_relpath(inputdata);
 if(length(inputdata)>1){
   warning('Several candidate files found:\n',paste0(inputdata,collapse='\n')
           ,'Will use ',inputdata[1]);
