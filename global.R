@@ -149,6 +149,9 @@ file_args$skip <- n_skip;
 #' 
 #' ## Set variables that may vary from one script to another, if they are 
 #' not already set in the calling script
+if(exists('na.strings')) options('datatable.na.strings'=na.strings) else {
+  options('datatable.na.strings'=c('NA','','-','(null)'));
+}
 if(!exists('.debug')) .debug <- 0;
 if(!exists('.projpackages')) .projpackages <- c('');
 if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
