@@ -130,14 +130,17 @@ if(is.null(.configpath)){
 source(.configpath,chdir = TRUE);
 .configdir <- dirname(.configpath);
 
-# o
+#' If there is a local config file, source it, overriding the above project 
+#' level configs
 if(file.exists(.configlocalpath <- file.path(.configdir,'config.local.R'))){
   source(.configlocalpath,chdir=TRUE)};
-
+#' 
+#' If there is a project level functions file, source that.
 if(file.exists(.functionsprojpath <- file.path(.configdir
                                                 ,'functions.project.R'))){
   source(.functionsprojpath)};
 
+#' Disambiguate the path to intputdata
 inputdata <- tidbits:::find_relpath(inputdata);
 if(length(inputdata)>1){
   warning('Several candidate files found:\n',paste0(inputdata,collapse='\n')
