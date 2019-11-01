@@ -73,7 +73,7 @@ instrequire(
     #,'pscl'
     
     # various analysis methods
-    'survival' # this one can be moved to exploration.R
+    #'survival' # this one can be moved to exploration.R
     #,'MASS','Hmisc','zoo','coin'
     
     # evaluating predictive power
@@ -85,7 +85,8 @@ instrequire(
     # data manipulation & piping. 
     # 'tools' was used by trailR.R
     # 'LaF' is used for fast and powerful reading of text files.
-    #,'readr','dplyr','LaF','tools','openxlsx'
+    #,'readr','LaF','tools','openxlsx'
+     'dplyr'
     #,'magrittr'
     #,'tibble','readxl','data.table','haven'
     # dummies breaks categoric variables into individual dummy variables
@@ -127,10 +128,16 @@ if(is.null(.configpath)){
        ,'this repository, and then try running this script again.')};
 
 source(.configpath,chdir = TRUE);
-if(file.exists(.configlocalpath <- file.path(dirname(.configpath)
-                                             ,'config.local.R'))){
-  source(.configlocalpath,chdir=TRUE);
-}
+.configdir <- dirname(.configpath);
+
+# o
+if(file.exists(.configlocalpath <- file.path(.configdir,'config.local.R'))){
+  source(.configlocalpath,chdir=TRUE)};
+
+if(file.exists(.functionsprojpath <- file.path(.configdir
+                                                ,'functions.project.R'))){
+  source(.functionsprojpath)};
+
 inputdata <- tidbits:::find_relpath(inputdata);
 if(length(inputdata)>1){
   warning('Several candidate files found:\n',paste0(inputdata,collapse='\n')
