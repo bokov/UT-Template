@@ -18,8 +18,9 @@ suppressWarnings(if(!is.null(attr(system('git config --global user.email'
 if(!is.null(attr(suppressWarnings(system('git config alias.upd',intern=T))
                  ,'status'))){
   system('git config --global alias.upd "!git submodule update --init --recursive\
-         --remote && git submodule foreach -q --recursive \'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)\'')} else message(
-           'You already have a git alias named "upd", leaving it unchanged.');
+         --remote && git submodule foreach -q --recursive \'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)\'"')} else message(
+           'You already have a git alias named "upd", leaving it unchanged.\n\n'
+           ,'If you wish to update that alias, use "system(\'git config --global --unset alias.upd\')"');
 
 if(!is.null(attr(suppressWarnings(system('git config alias.lg',intern=T))
                  ,'status'))){
