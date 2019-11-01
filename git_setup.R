@@ -20,7 +20,8 @@ if(!is.null(attr(suppressWarnings(system('git config alias.upd',intern=T))
   system('git config --global alias.upd "!git submodule update --init --recursive\
          --remote && git submodule foreach -q --recursive \'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch || echo master)\'"')} else message(
            'You already have a git alias named "upd", leaving it unchanged.\n\n'
-           ,'If you wish to update that alias, use "system(\'git config --global --unset alias.upd\')"');
+           ,'If you wish to update that alias, use "system(\'git config --global --unset alias.upd\')"\n\n'
+           ,'After that, run "source(\'scripts/git_setup.R\')" or repeat whatever you just did that triggered this script.');
 
 if(!is.null(attr(suppressWarnings(system('git config alias.lg',intern=T))
                  ,'status'))){
