@@ -24,7 +24,7 @@ options(tsci.gitsub = function(stopfile='.developer'){if(!file.exists(stopfile))
     message('Developer mode-- ignoring.'); return(0);
   }});
 
-clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:git_subupd
+clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$|_cache$|_files$' # deps:git_subupd
                         ,all=TRUE,cleanglobal=TRUE
                         ,updatemodules=!file.exists('.developer')
                         ,envir=parent.frame()){
@@ -35,7 +35,7 @@ clean_slate <- function(command="",removepatt='^\\.RData$|*.R\\.rdata$' # deps:g
                              ,'function), don\'t expect any code that you put '
                              ,'after it to work!');
   # remove cached files
-  file.remove(list.files(pattern=removepatt,all.files=TRUE,recursive=TRUE,full.names = TRUE));
+  unlink(list.files(pattern=removepatt,all.files=TRUE,recursive=TRUE,full.names = TRUE,include.dirs=TRUE),recursive=TRUE,force=TRUE);
   # Update the git submodules
   if(updatemodules) getOption('tsci.gitsub')();
   # clear out calling environment
