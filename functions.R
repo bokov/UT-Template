@@ -109,3 +109,191 @@ try_import <- function(file,which=1,
   return(out)
 }
 
+#' Checks to see if there is an option with the user-specified name, and
+#' if there isn't, creates one with the user-specified default. Returns the 
+#' final value of that option.
+#'
+#' @param name    The option that should exist.
+#' @param default What to set it to if it doesn't exist.
+#'
+#' @return The value of the \code{name} option.
+#' @export
+#'
+#' @examples
+#' optinit()
+optinit <- function(name='.stacks',default=new.env()){
+  oo <- options(name);
+  if(is.null(oo[[name]])){
+    oo[[name]] <- default;
+    do.call(options,oo);}
+  return(options(name)[[1]]);
+};
+
+#' Create a new persistent 'stack' of values that can be 'popped'
+#'
+#' @param xx   A vector or list.
+#' @param name What to name the new stack (character)
+#'
+#' @return Value of \code{name}
+#' @export
+#'
+#' @examples
+#' stack(letters)
+#' 
+stack <- function(xx,name){
+  stacks<-optinit('.stacks',new.env());
+  if(missing(name)) name <- make.names(as.character(substitute(xx)));
+  stacks[[name]] <- xx;
+  return(name);
+};
+
+#' Return the top value of a stack and remove it from the stack
+#'
+#' @param xx       Name of stack
+#' @param fallback What to return if the stack is empty or doesn't exist
+#'
+#' @return Either the previous first item in the stack or \code{fallback}
+#' @export
+#'
+#' @examples
+#' stack(letters[1:3],'teststack')
+#' # since stack is not empty, the 'fallback' argument is ignored
+#' pop('teststack','EMPTY!')
+#' pop('teststack')
+#' pop('teststack')
+#' pop('teststack')
+#' # now the stack is empty, so the 'fallback' argument is used
+#' pop('teststack','EMPTY!')
+pop <- function(xx,fallback=NULL){
+  stacks<-optinit('.stacks',new.env());
+  if(length(stacks[[xx]])==0) return(fallback);
+  out <- stacks[[xx]][[1]];
+  stacks[[xx]] <- stacks[[xx]][-1];
+  return(out);
+}
+
+#' A wrapper for R's built-in menu with additional features.
+#'
+#' @param choices      Passed to \code{menu}
+#' @param batchmode    If given, this is the value that this function will 
+#'                     return without displaying a menu if \code{interactive()}
+#'                     is \code{FALSE}
+#' @param autoresponse If given, this is the value that this function will 
+#'                     return without displaying a menu OR checking whether its
+#'                     in an interactive environment. This is a hook for 
+#'                     automated testing and CI use-cases.
+#' @param title        Passed to \code{menu}
+#' @param graphics     Passed to \code{menu}
+#' @param extramessage Message that prints before the title of the menu. Or a 
+#'                     function that will be executed before the menu is 
+#'                     invoked.
+#' @param ignorezero   If \code{TRUE} then instead of exiting, the menu will 
+#'                     re-display if the user chooses \code{0}
+#'
+#' @return An integer corresponding to the choice the user made.
+#' @export
+#'
+#' @examples
+#' smartmenu(month.name)
+#' smartmenu(month.name,batchmode=4)
+#' smartmenu(month.name,batchmode=4,autoresponse=10)
+#' 
+smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL
+                      ,graphics=FALSE,extramessage=c(),ignorezero=TRUE){
+  if(!missing(extramessage)){
+    if(is.function(extramessage)) extramessage() else message(extramessage)};
+  if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
+  if(interactive()){
+    out <- menu(choices=choices,graphics=FALSE,title=title);
+    if(ignorezero) while(out==0) {
+      out <- menu(choices=choices,graphics=FALSE,title=title)};
+    return(out);
+  } else return(batchmode);
+}
+
+#' A wrapper for \code{file.choose()} that's friendly to automated testing.
+#'
+#' @param batchmode    If given, this is the value that this function will 
+#'                     return without displaying a menu if \code{interactive()}
+#'                     is \code{FALSE}
+#' @param autoresponse If given, this is the value that this function will 
+#'                     return without displaying a menu OR checking whether its
+#'                     in an interactive environment. This is a hook for 
+#'                     automated testing and CI use-cases.
+#' @param ignorecancel If the user cancels, continue asking for a file.
+#'
+#' @return Character string
+#' @export
+#'
+#' @examples
+smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE){
+  if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
+  if(interactive()){
+    out <- try(file.choose(),silent = TRUE);
+    if(ignorecancel){
+      while(methods::is(out,'try-error')){
+        message('This is a required file. Please make a selection.');
+        out <- try(file.choose(),silent=TRUE);
+        }
+      } else if(methods::is(out,'try-error')) stop(attr(out,'condition'));
+    return(out);
+    };
+  return(batchmode);
+};
+
+#' A more customizable way to generate guaranteed legal and unique names
+#'
+#' @param xx           An object that has names, only required argument
+#' @param names        Character vector of proposed names for the object 
+#' @param namepre      The prefix to assign to auto-generated names
+#' @param namepad      How many zeros to use for padding numeric infixes of 
+#'                     auto-generated names
+#' @param namesuf      The suffix to assign to auto-generated names
+#' @param maxlen       The maximum length to which input names will be truncated
+#' @param illegalchars A regexp matching characters that will be removed from 
+#'                     names
+#' @param namepattern  The \code{sprintf} pattern for auto-generated names. If
+#'                     used, \code{namepre}, \code{namepad}, and \code{namesuf}
+#'                     will be ignored, but in that case you are responsible for
+#'                     setting the correct value for \code{nameprevious}.
+#' @param nameprevious Pattern for recognizing existing auto-generated names,
+#'                     to prevent endless loops.
+#'
+#' @return If \code{xx} provided, that object with legal and unique names. 
+#'         Otherwise, just the names.
+#' @export
+#'
+#' @examples
+#' 
+#' junknames <- replicate(26,paste0(sample(c(letters,LETTERS
+#'                                           ,0:9
+#'                                           ,c('.',' ','\t','\n','|','_','=',':',';','/'))
+#'                                           ,sample(0:10,1),rep=TRUE),collapse=''))
+#' junknames
+#' 
+#' smartsetnames(names=junknames)
+#' 
+#' namedobj <- setNames(LETTERS,junknames)
+#' 
+#' smartsetnames(namedobj)
+#' 
+smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=3
+                          ,namesuf='',maxlen=6
+                          ,illegalchars='[^A-Za-x[:digit:]_]'
+                          ,namepattern=paste0(namepre,'%0',namepad,'d'
+                                              ,namesuf)
+                          ,nameprevious=paste0('^',namepre,'[0-9]{',namepad
+                                               ,'}$')){
+  if(is.null(names)) names <- rep('',length(xx));
+  names <- substr(gsub(illegalchars,'',names),1,maxlen);
+  names[is.na(names)] <- '';
+  replace <- names!=make.names(names,unique=TRUE) |
+    grepl(nameprevious,names);
+  while(any(replace)){
+    names[replace] <- sprintf(namepattern,seq_len(sum(replace)));
+    replace <- names!=make.names(names,unique=TRUE);
+  }
+  if(missing(xx)) return(names) else return(setNames(xx,names));
+}
+
+c()
