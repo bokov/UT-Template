@@ -174,21 +174,28 @@ pop <- function(xx,fallback=NULL){
 
 #' A wrapper for R's built-in menu with additional features.
 #'
-#' @param choices      Passed to \code{menu}
-#' @param batchmode    If given, this is the value that this function will 
-#'                     return without displaying a menu if \code{interactive()}
-#'                     is \code{FALSE}
-#' @param autoresponse If given, this is the value that this function will 
-#'                     return without displaying a menu OR checking whether its
-#'                     in an interactive environment. This is a hook for 
-#'                     automated testing and CI use-cases.
-#' @param title        Passed to \code{menu}
-#' @param graphics     Passed to \code{menu}
-#' @param extramessage Message that prints before the title of the menu. Or a 
-#'                     function that will be executed before the menu is 
-#'                     invoked.
-#' @param ignorezero   If \code{TRUE} then instead of exiting, the menu will 
-#'                     re-display if the user chooses \code{0}
+#' @param choices       Passed to \code{menu}
+#' @param batchmode     If given, this is the value that this function will 
+#'                      return without displaying a menu if \code{interactive()}
+#'                      is \code{FALSE}
+#' @param autoresponse  If given, this is the value that this function will 
+#'                      return without displaying a menu OR checking whether its
+#'                      in an interactive environment. This is a hook for 
+#'                      automated testing and CI use-cases.
+#' @param title         Passed to \code{menu}
+#' @param usenames      If \code{TRUE} (default) and \code{choices} has a 
+#'                      \code{names} attribute then prepend names to choices
+#' @param namepattern   If \code{usenames} is \code{TRUE} and there are names,
+#'                      combine them with values using this \code{sprintf} 
+#'                      pattern
+#' @param graphics      Passed to \code{menu}
+#' @param extramessage  Message that prints before the title of the menu. Or a 
+#'                      function that will be executed before the menu is 
+#'                      invoked.
+#' @param ignorezero    If \code{TRUE} then instead of exiting, the menu will 
+#'                      re-display if the user chooses \code{0}
+#' @param ignorezeromsg Message to send if \code{ignorezero} is \code{TRUE} and
+#'                      0 has been typed.
 #'
 #' @return An integer corresponding to the choice the user made.
 #' @export
@@ -198,14 +205,18 @@ pop <- function(xx,fallback=NULL){
 #' smartmenu(month.name,batchmode=4)
 #' smartmenu(month.name,batchmode=4,autoresponse=10)
 #' 
-smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL
-                      ,graphics=FALSE,extramessage=c(),ignorezero=TRUE){
+smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
+                      ,namepattern='%s\t-\t%s',graphics=FALSE,extramessage=c()
+                      ,ignorezero=TRUE
+                      ,ignorezeromsg='This is a required value'){
   if(!missing(extramessage)){
     if(is.function(extramessage)) extramessage() else message(extramessage)};
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
   if(interactive()){
+    if(usenames) choices <- sprintf(namepattern,names(choices),choices);
     out <- menu(choices=choices,graphics=FALSE,title=title);
     if(ignorezero) while(out==0) {
+      message(ignorezeromsg);
       out <- menu(choices=choices,graphics=FALSE,title=title)};
     return(out);
   } else return(batchmode);
