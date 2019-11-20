@@ -8,23 +8,18 @@
 #+ message=F,echo=F
 # init ----
 debug <- 0;
+.deps <- c( 'data.R' ); 
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .currentscript <- parent.frame(2)$ofile;
 if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
-tself(scriptname=.currentscript);
 #' Saving original file-list so we don't keep exporting functions and 
 #' environment variables to other scripts
 .origfiles <- ls();
 # read student pre-run script if it exists ----
-if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
-
 #+ echo=FALSE,message=FALSE
 # read dat00 ----
 #' generic read function which auto-guesses file formats:
-message('About to autoread');
-dat00 <- try_import(inputdata);
-message('Done autoread, starting data dictionary');
 #+ echo=F
 # make data dictionary ----
 #' ## Create the data dictionary
