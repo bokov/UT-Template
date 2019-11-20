@@ -213,7 +213,8 @@ smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
     if(is.function(extramessage)) extramessage() else message(extramessage)};
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
   if(interactive()){
-    if(usenames) choices <- sprintf(namepattern,names(choices),choices);
+    if(usenames & !is.null(names(choices))){
+      choices <- sprintf(namepattern,names(choices),choices)};
     out <- menu(choices=choices,graphics=FALSE,title=title);
     if(ignorezero) while(out==0) {
       message(ignorezeromsg);
@@ -232,12 +233,16 @@ smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
 #'                     in an interactive environment. This is a hook for 
 #'                     automated testing and CI use-cases.
 #' @param ignorecancel If the user cancels, continue asking for a file.
+#' @param cancelvalue  What to return if \code{ignorecancel} is \code{FALSE}
+#'                     and the user does in fact cancel. If set to \code{stop}
+#'                     (unquoted) then returns an error.
 #'
 #' @return Character string
 #' @export
 #'
 #' @examples
-smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE){
+smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
+                            ,cancelvalue=NULL){
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
   if(interactive()){
     out <- try(file.choose(),silent = TRUE);
@@ -246,7 +251,10 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE){
         message('This is a required file. Please make a selection.');
         out <- try(file.choose(),silent=TRUE);
         }
-      } else if(methods::is(out,'try-error')) stop(attr(out,'condition'));
+      } else if(methods::is(out,'try-error')){
+        if(identical(cancelvalue,stop)) stop(attr(out,'condition'));
+        return(cancelvalue);
+      }
     return(out);
     };
   return(batchmode);
@@ -296,7 +304,10 @@ smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=3
                           ,nameprevious=paste0('^',namepre,'[0-9]{',namepad
                                                ,'}$')){
   if(is.null(names)) names <- rep('',length(xx));
-  names <- substr(gsub(illegalchars,'',names),1,maxlen);
+  names <- gsub(illegalchars,'',names);
+  # this second round is to remove leading number and _ which are only illegal
+  # at the beginning of a variable name. Also trim to size in this step
+  names <- substr(sub('^[^A-Za-z.]+','',names),1,maxlen);
   names[is.na(names)] <- '';
   replace <- names!=make.names(names,unique=TRUE) |
     grepl(nameprevious,names);
@@ -305,6 +316,31 @@ smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=3
     replace <- names!=make.names(names,unique=TRUE);
   }
   if(missing(xx)) return(names) else return(setNames(xx,names));
+}
+
+#' An automation-friendly wrapper for readline.
+#'
+#' @param prompt       Passed to \code{readline}
+#' @param batchmode    If given, this is the value that this function will 
+#'                     return without displaying a menu if \code{interactive()}
+#'                     is \code{FALSE}
+#' @param autoresponse If given, this is the value that this function will 
+#'                     return without displaying a menu OR checking whether its
+#'                     in an interactive environment. This is a hook for 
+#'                     automated testing and CI use-cases.
+#'
+#' @return The character string typed in at the keyboard or \code{autoresponse}
+#'         or \code{batchmode}
+#' @export
+#'
+#' @examples
+#' smartreadline('Type something: ',batchmode='Nothing')
+#' smartreadline('Type something: ',autoresponse='Hello world')
+#' 
+smartreadline <- function(prompt,batchmode='',autoresponse){
+  if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
+  if(interactive()) return(readline(prompt));
+  return(batchmode);
 }
 
 c()
