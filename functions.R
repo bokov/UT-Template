@@ -298,7 +298,7 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
 #' 
 smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=3
                           ,namesuf='',maxlen=6
-                          ,illegalchars='[^A-Za-x[:digit:]_]'
+                          ,illegalchars='[^A-Za-z[:digit:]_]'
                           ,namepattern=paste0(namepre,'%0',namepad,'d'
                                               ,namesuf)
                           ,nameprevious=paste0('^',namepre,'[0-9]{',namepad
@@ -342,5 +342,12 @@ smartreadline <- function(prompt,batchmode='',autoresponse){
   if(interactive()) return(readline(prompt));
   return(batchmode);
 }
+
+makevarmap <- function(dt){
+  data.frame(origname=colnames(dt)
+             ,varname=smartsetnames(names = colnames(dt),maxlen = 20)
+             ,dispname=smartsetnames(names=colnames(dt),maxlen=40
+                                     ,illegalchars="[^[:alnum:] _.,':]")
+             ,comment=NA)};
 
 c()
