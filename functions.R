@@ -245,18 +245,34 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
                             ,cancelvalue=NULL){
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
   if(interactive()){
-    out <- try(file.choose(),silent = TRUE);
-    if(ignorecancel){
-      while(methods::is(out,'try-error')){
-        message('This is a required file. Please make a selection.');
-        out <- try(file.choose(),silent=TRUE);
-        }
-      } else if(methods::is(out,'try-error')){
-        if(identical(cancelvalue,stop)) stop(attr(out,'condition'));
-        return(cancelvalue);
-      }
-    return(out);
-    };
+    fileselected <- FALSE;
+    while(!fileselected){
+      if(methods::is(out<-try(file.choose(),silent = TRUE),'try-error')){
+        if(ignorecancel){
+          message('This is a required file. Please make a selection.');
+        } else {
+          if(identical(cancelvalue,stop)) stop(attr(out,'condition'));
+          return(cancelvalue)};
+      } else {
+        if(file.exists(out)&&!file.info(out)$isdir) return(out);
+        if(!file.exists(out)) message(sprintf(
+          "File '%s' not found. Please try again.",out)) else {
+            if(!file.info(out)$isdir) message(sprintf(
+              "'%s' is a directory, not a file",out))
+          }}
+      }};
+    # out <- try(file.choose(),silent = TRUE);
+    # if(ignorecancel){
+    #   while(methods::is(out,'try-error')){
+    #     
+    #     out <- try(file.choose(),silent=TRUE);
+    #     }
+    #   } else if(methods::is(out,'try-error')){
+    #     if(identical(cancelvalue,stop)) stop(attr(out,'condition'));
+    #     return(cancelvalue);
+    #   }
+    # return(out);
+    # };
   return(batchmode);
 };
 
