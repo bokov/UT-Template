@@ -389,7 +389,7 @@ decimals <- function(xx,dmin=-10,dmax=20,tol=.9){
   if(length(xx)==0) return(0);
   decs <- seq(dmin,dmax,by=5);
   for(ii in decs) if(mean(xx==round(xx,ii))>=tol) break;
-  for(jj in seq(decs[max(match(ii,decs)-1,0)]
+  for(jj in seq(decs[max(match(ii,decs)-1,1)]
                 ,decs[min(match(ii,decs)+1,length(decs))])){
     if(mean(xx==round(xx,jj))>=tol) break;}
   return(jj);
