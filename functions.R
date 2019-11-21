@@ -366,4 +366,73 @@ makevarmap <- function(dt){
                                      ,illegalchars="[^[:alnum:] _.,':]")
              ,comment=NA)};
 
+#' Return the number of decimal places used by a vector
+#'
+#' @param xx   Numeric vector
+#' @param dmin The lowest number of decimal places to consider (by default,
+#'             rounded to the nearest 1e+10)
+#' @param dmax The highest number of decimal places to consider (by default,
+#'             rounded to the nearest 1e-20)
+#' @param tol  What fraction of the numbers have to be as precise or less 
+#'             precise than the selected decimal threshold (set to \code{1})
+#'             for all of them to be at or below the threshold.
+#'
+#' @return Single numeric value indicating how much we can round the \code{xx}
+#'         without changing the value of (most of) it.
+#' @export
+#'
+#' @examples
+#' decimals(runif(5))
+#' decimals(1:5*10)
+decimals <- function(xx,dmin=-10,dmax=20,tol=.9){
+  decs <- seq(dmin,dmax,by=5);
+  for(ii in decs) if(mean(xx==round(xx,ii))>=tol) break;
+  for(jj in seq(decs[max(match(ii,decs)-1,0)]
+                ,decs[min(match(ii,decs)+1,length(decs))])){
+    if(mean(xx==round(xx,jj))>=tol) break;}
+  return(jj);
+}
+
+randomstr <- function(nn,minlen=2,maxlen=8,len
+                      ,chars=c(LETTERS,letters,0:9,0:9)){
+  replicate(nn,paste0(sample(chars,sample(minlen:maxlen,1),rep=T)
+                      ,collapse=''));
+}
+
+simdata <- function(xx,nn=length(xx)){
+  oo<-UseMethod('simdata');
+  if(!is.data.frame(oo)){
+    oo[sample(seq_along(oo),mean(is.na(xx))*length(oo))]<- NA};
+  oo};
+
+
+simdata.data.frame <- function(xx,nn=nrow(xx)){
+  oo <- lapply(xx,simdata,nn);
+  data.frame(oo);
+}
+
+simdata.Date <- function(xx,nn=length(xx)){
+  as.Date(simdata.numeric(as.numeric(xx),nn),origin='1970-01-01')};
+
+simdata.POSIXct <- function(xx,nn=length(xx)){
+  as.POSIXct(simdata.numeric(as.numeric(xx),nn),origin='1970-01-01')};
+
+simdata.default <- function(xx,nn=length(xx)){rep(NA,nn)}
+
+simdata.numeric <- function(xx,nn=length(xx)){
+  dec <- decimals(xx);
+  unname(round(quantile(xx,runif(nn),na.rm=TRUE),dec));
+}
+
+simdata.factor <- function(xx,nn=length(xx)){
+  oo <- sample(xx,nn,rep=TRUE);
+  levels(oo) <- randomstr(length(levels(oo)));
+  oo;
+}
+
+simdata.character <- function(xx,nn=length(xx)){
+  if(length(unique(xx))<40){
+    return(as.character(simdata.factor(factor(xx),nn)))};
+  randomstr(nn);
+}
 c()
