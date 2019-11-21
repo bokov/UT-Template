@@ -385,6 +385,8 @@ makevarmap <- function(dt){
 #' decimals(runif(5))
 #' decimals(1:5*10)
 decimals <- function(xx,dmin=-10,dmax=20,tol=.9){
+  xx <- na.omit(xx);
+  if(length(xx)==0) return(0);
   decs <- seq(dmin,dmax,by=5);
   for(ii in decs) if(mean(xx==round(xx,ii))>=tol) break;
   for(jj in seq(decs[max(match(ii,decs)-1,0)]
