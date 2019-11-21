@@ -8,6 +8,7 @@
 #+ message=F,echo=F
 # init ----
 debug <- 0;
+.projpackages <- c('dplyr');
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .currentscript <- parent.frame(2)$ofile;
@@ -16,10 +17,18 @@ if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
 #' environment variables to other scripts
 .origfiles <- ls();
 #+ echo=FALSE,message=FALSE
-# read dat00 ----
+# read data ----
 #' generic read function which auto-guesses file formats:
 message('About to autoread');
 rawdata <- sapply(inputdata,try_import,simplify=FALSE);
+# rename columns
+if(!file.exists(file.path(.workdir,'varmap.csv'))){
+  map0 <- sapply(rawdata,makevarmap,simplify=FALSE) %>% c(.id='table') %>%
+    do.call(bind_rows,.);
+  write.csv(map0,file.path(.workdir,'varmap.csv'),row.names = FALSE);
+} else {
+  map0 <- try_import(file.path(.workdir,'varmap.csv'));
+}
 
 # save out ----
 #' ## Save all the processed data to an rdata file 
