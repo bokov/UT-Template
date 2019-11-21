@@ -30,7 +30,7 @@ if(length(outputsims)>0){
   for(ii in names(outputsims)){
     export(simrawdata[[ii]] <- simdata(rawdata[[ii]])
            ,normalizePath(file.path(.workdir,outputsims[[ii]])))};
-  
+  source('snippets.R');
   inputsimdata <- inputdata;
   inputsimdata[names(outputsims)] <- outputsims;
   newconfigr <- filesections('config.R');
