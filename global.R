@@ -127,6 +127,8 @@ if(is.null(.configpath)){
        ,'this repository, and then try running this script again.')};
 
 source(.configpath);
+.configlocal <- file.path(dirname(.configpath),'local.config.R');
+if(file.exists(.configlocal)) source(.configlocal);
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
