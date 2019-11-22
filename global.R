@@ -73,7 +73,7 @@ instrequire(
     #,'pscl'
     
     # various analysis methods
-    'survival' # this one can be moved to exploration.R
+    #'survival' 
     #,'MASS','Hmisc','zoo','coin'
     
     # evaluating predictive power
@@ -89,7 +89,7 @@ instrequire(
     #,'magrittr'
     #,'tibble','readxl','data.table','haven'
     # dummies breaks categoric variables into individual dummy variables
-    ,'dummies'
+    #,'dummies'
     #,'lubridate'
     
     # plotting
@@ -97,14 +97,14 @@ instrequire(
     #,'ggplot2','grid','GGally','heatmap3','gridExtra','scales'
     
     # string manipulation
-    ,'stringi' #,'stringr'
+    #,'stringi' #,'stringr'
     
     # table formatting
-    ,'pander','tableone','broom'
+    #,'pander','tableone','broom'
     #,'knitr','htmltab','stargazer','janitor'
     
     # Web
-    ,'RCurl','XML'
+    #,'RCurl','XML'
 ));
 
 #' Turn JIT to max: pre-compile all closures, `for`, `while`, and `repeat` loops
