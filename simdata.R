@@ -52,6 +52,6 @@ if(length(outputsims)>0){
 #' ...which includes the audit trail
 suppressWarnings(save(file=file.path(.workdir,paste0(basename(.currentscript)
                                                    ,'.rdata'))
-                      ,list=setdiff(ls(),.origfiles)));
+                      ,list=setdiff(ls(),c('ii','inputsimdata',.origfiles))));
 #+ echo=F,eval=F
 c()
