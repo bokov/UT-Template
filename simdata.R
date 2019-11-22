@@ -40,7 +40,7 @@ if(length(outputsims)>0){
                                                          ,names(inputsimdata)
                                                          ,inputsimdata)
                                                  ,collapse='\n ,'),'\n);');
-  writeLines(unlist(.newconfig),normalizePath(file.path(.workdir,'config.R')));
+  writeLines(unlist(newconfigr),normalizePath(file.path(.workdir,'config.R')));
 }
 
 #+ echo=FALSE
