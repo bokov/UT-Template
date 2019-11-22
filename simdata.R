@@ -29,7 +29,8 @@ simrawdata <- list();
 if(length(outputsims)>0){
   for(ii in names(outputsims)){
     export(simrawdata[[ii]] <- simdata(rawdata[[ii]])
-           ,normalizePath(file.path(.workdir,outputsims[[ii]])))};
+           ,normalizePath(file.path(.workdir,outputsims[[ii]])
+                          ,mustWork = FALSE))};
   if(file.exists('snippets.R')) source('snippets.R') else{
     source(normalizePath(file.path('scripts','snippets.R')))};
   inputsimdata <- inputdata;
@@ -40,7 +41,8 @@ if(length(outputsims)>0){
                                                          ,names(inputsimdata)
                                                          ,inputsimdata)
                                                  ,collapse='\n ,'),'\n);');
-  writeLines(unlist(newconfigr),normalizePath(file.path(.workdir,'config.R')));
+  writeLines(unlist(newconfigr),normalizePath(file.path(.workdir,'config.R')
+                                              ,mustWork = FALSE));
 }
 
 #+ echo=FALSE
