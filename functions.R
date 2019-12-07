@@ -315,7 +315,7 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
 #' 
 #' smartsetnames(namedobj)
 #' 
-smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=3
+smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=2
                           ,namesuf='',maxlen=6
                           ,illegalchars='[^A-Za-z[:digit:]_]'
                           ,namepattern=paste0(namepre,'%0',namepad,'d'
