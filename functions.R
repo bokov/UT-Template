@@ -557,9 +557,9 @@ choose_outcomes <- function(dat,criteria='c_safetf',nmax=1,random=TRUE
                     Please manually assign the outcome/s you actually want to use.');
   with_cm(out,comment)};
 
-choose_predictors <- function(dat,criteria=c_safe,nnmax=3,random=TRUE
+choose_predictors <- function(dat,criteria=c_safe,nmax=3,random=TRUE
                               ,exclude=c()){
-  out <- choose_outcomes(dat,criteria=criteria,nnmax=nmax,random=random
+  out <- choose_outcomes(dat,criteria=criteria,nmax=nmax,random=random
                          ,exclude=exclude);
   comment(out) <- gsub('outcome','predictor',comment(out));
 }
