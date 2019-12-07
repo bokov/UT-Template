@@ -210,8 +210,8 @@ pop <- function(xx,fallback=NULL){
 #' 
 smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
                       ,namepattern='%s\t-\t%s',graphics=FALSE,extramessage=c()
-                      ,ignorezero=TRUE
-                      ,ignorezeromsg='This is a required value'){
+                      ,ignorezero=TRUE,ignorezeromsg='This is a required value'
+                      ,responselog='.responselog'){
   if(!missing(extramessage)){
     if(is.function(extramessage)) extramessage() else message(extramessage)};
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
@@ -222,6 +222,7 @@ smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
     if(ignorezero) while(out==0) {
       message(ignorezeromsg);
       out <- menu(choices=choices,graphics=FALSE,title=title)};
+    smartlog(out,deparse(match.call()));
     return(out);
   } else return(batchmode);
 }
@@ -255,9 +256,13 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
           message('This is a required file. Please make a selection.');
         } else {
           if(identical(cancelvalue,stop)) stop(attr(out,'condition'));
+          smartlog(cancelvalue,deparse(match.call()));
           return(cancelvalue)};
       } else {
-        if(file.exists(out)&&!file.info(out)$isdir) return(out);
+        # in case somebody tries to quote their file name
+        out <- gsub('^[\'"]|[\'"]$','',out);
+        if(file.exists(out)&&!file.info(out)$isdir){
+          smartlog(out,deparse(match.call()));return(out)};
         if(!file.exists(out)) message(sprintf(
           "File '%s' not found. Please try again.",out)) else {
             if(!file.info(out)$isdir) message(sprintf(
@@ -358,9 +363,23 @@ smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=2
 #' 
 smartreadline <- function(prompt,batchmode='',autoresponse){
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
-  if(interactive()) return(readline(prompt));
+  if(interactive()){
+    out <- readline(prompt);
+    smartlog(out,deparse(match.call()));
+    return(out)};
   return(batchmode);
 }
+
+#' This function starts or continues a logfile named by the \code{file}
+#' argument, and the logfile is simple commented R code for a list... but the
+#' list doesn't automatically get terminated, that need to be done manually by
+#' appending a ')' to it
+smartlog <- function(value,comment,file='.logfile'){
+  if(!file.exists(file)) cat('list(',file=file) else {
+    cat('\n,',file=file,append=TRUE)};
+  if(is.numeric(value)) cat(value,file=file,append=TRUE) else {
+    cat('"',value,'"',file=file,append=TRUE)};
+  if(!missing(comment)) cat(' #',comment,file=file,append=TRUE)};
 
 #' Internal function used by \code{simdata} for creating random labels for 
 #' discrete variables
