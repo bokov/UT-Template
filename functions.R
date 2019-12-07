@@ -545,5 +545,24 @@ current_scriptname <- function(default='INTERACTIVE_SESSION.R'
   return(c(.scriptname,gsub('\\.spin\\.Rmd$','.R',knitr::current_input())
            ,default)[1])};
 
+choose_outcomes <- function(dat,criteria='c_safetf',nmax=1,random=TRUE
+                            ,exclude=c()){
+  out<-setdiff(do.call(v,list(criteria,dat)),exclude);
+  if(length(out)>0){
+    nmax <- min(length(out),nmax);
+    out <- if(random) sample(out,nmax) else out[1:nmax]};
+  comment <- if(length(out)>1) 'These variables were ' else {
+    'This variable was '};
+  comment <- paste0(comment,' arbitrarily chosen for demonstration purposes.
+                    Please manually assign the outcome/s you actually want to use.');
+  with_cm(out,comment)};
+
+choose_predictors <- function(dat,criteria=c_safe,nnmax=3,random=TRUE
+                              ,exclude=c()){
+  out <- choose_outcomes(dat,criteria=criteria,nnmax=nmax,random=random
+                         ,exclude=exclude);
+  comment(out) <- gsub('outcome','predictor',comment(out));
+}
+
 
 c()
