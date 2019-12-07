@@ -129,6 +129,14 @@ if(is.null(.configpath)){
 source(.configpath);
 .configlocal <- file.path(dirname(.configpath),'local.config.R');
 if(file.exists(.configlocal)) source(.configlocal);
+#' Validata the inputdata variable
+if(!exists('inputdata')) stop('Your `config.R` or `local.config.R` file does '
+                              ,'not have an `inputdata` variable set');
+#' Make sure all files listed in `inputdata` actually exist
+for(ii in seq_along(inputdata)){
+  if(is.null(.iipath<-tidbits::find_filepath(inputdata[ii]))){
+    stop('Cannot find file ',inputdata[ii])} else {
+      inputdata[ii] <- .iipath}};
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
@@ -181,11 +189,12 @@ urls <- list(
 # script-specific packages ----
 if(length(setdiff(.projpackages,'') > 0)) instrequire(.projpackages);
 # start logging ----
-tself(scriptname=.currentscript);
+#if(exists('tself')) tself(scriptname=.currentscript);
 # run scripts on which this one depends ----
 # if any that have not been cached yet
 setwd(.workdir);
-.loadedobjects <- tidbits:::load_deps(.deps,cachedir = .workdir);
+#.loadedobjects <- tidbits:::load_deps(.deps,cachedir = .workdir);
+.loadedobjects <- load_deps2(.deps,cachedir = .workdir);
 # files already existing ----
 .origfiles <- ls(all=T);
 c()
