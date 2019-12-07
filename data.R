@@ -11,8 +11,8 @@ debug <- 0;
 .projpackages <- c('dplyr');
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
-.currentscript <- parent.frame(2)$ofile;
-if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
+#.currentscript <- parent.frame(2)$ofile;
+.currentscript <- current_scriptname('data.R');
 #' Saving original file-list so we don't keep exporting functions and 
 #' environment variables to other scripts
 .origfiles <- ls();
@@ -20,6 +20,7 @@ if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
 # read data ----
 #' generic read function which auto-guesses file formats:
 message('About to autoread');
+
 rawdata <- sapply(inputdata,try_import,simplify=FALSE);
 # rename columns
 if(!file.exists(file.path(.workdir,'varmap.csv'))){

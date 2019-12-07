@@ -11,8 +11,7 @@ debug <- 0;
 .deps <- c( 'data.R' ); 
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
-.currentscript <- parent.frame(2)$ofile;
-if(is.null(.currentscript)) .currentscript <- 'RUN_FROM_INTERACTIVE_SESSION';
+.currentscript <- current_scriptname('simdata.R');
 #' Saving original file-list so we don't keep exporting functions and 
 #' environment variables to other scripts
 #' 
