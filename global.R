@@ -53,7 +53,7 @@ if(file.exists('functions.R')) source('functions.R');
 if(!require('devtools')){
   install.packages('devtools',dependencies=TRUE
                    ,repos=getOption('repos','https://cran.rstudio.com'))};
-devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
+#devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
 devtools::install_github('bokov/tidbits',ref='integration'); library(tidbits);
 devtools::install_github('bokov/rio',ref='master'); library(rio);
 #+ echo=F
