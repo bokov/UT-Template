@@ -119,7 +119,8 @@ n_skip <- 0;
 file_args <- list(check.names=T,blank.lines.skip=T);
 #' ## Load local config file
 #' 
-.configpath <- tidbits:::find_relpath('config.R')[1];
+# local_config ----
+.configpath <- tidbits::find_filepath('config.R',patexcl='[[:punct:]]backup\\.');
 if(is.null(.configpath)){
   stop('Please copy example_config.R to config.R, modify it so that the '
        ,'\'inputdata\' variable is the full path to your data file on your '
