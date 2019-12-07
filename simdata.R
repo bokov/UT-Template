@@ -7,7 +7,7 @@
 #' 
 #+ message=F,echo=F
 # init ----
-debug <- 0;
+debug <- 1;
 .deps <- c( 'data.R' ); 
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
@@ -17,13 +17,17 @@ if(debug>0) source('global.R') else {
 #' 
 #### simulate data ####
 .origfiles <- ls();
+message('Creating outputsims');
 outputsims <- setNames(file.path('data',basename(inputdata)),names(inputdata));
+message('outputsims: ',paste0(outputsims,collapse=','));
 # remove the ones that are remote links
 outputsims <- outputsims[!grepl('^(ftp|https?)://',outputsims)];
+message('normalized outputsims: ',paste0(normalizePath(file.path(.workdir,outputsims)),collapse=','));
 # remove the ones that already exist in the shared directory
 outputsims <- outputsims[!file.exists(normalizePath(file.path(.workdir
                                                               ,outputsims)
                                                     ,mustWork = FALSE))];
+message('Done creating outputsims');
 simrawdata <- list();
 if(length(outputsims)>0){
   for(ii in names(outputsims)){
