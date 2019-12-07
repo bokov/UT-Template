@@ -1,5 +1,8 @@
 # This is the file where custom functions, if any are needed, should be defined.
+library(methods);
 
+# Generalizable functions ----
+# (might be moved to tidbits/SPURS in the future)
 #' Determine whether a file is "plain-text" or some sort of binary format
 #'
 #' @param filename Path to the file
@@ -359,6 +362,8 @@ smartreadline <- function(prompt,batchmode='',autoresponse){
   return(batchmode);
 }
 
+#' Internal function used by \code{simdata} for creating random labels for 
+#' discrete variables
 makevarmap <- function(dt){
   data.frame(origname=colnames(dt)
              ,varname=smartsetnames(names = colnames(dt),maxlen = 20)
@@ -395,6 +400,7 @@ decimals <- function(xx,dmin=-10,dmax=20,tol=.9){
   return(jj);
 }
 
+#' Internal function used by \code{simdata}.
 randomstr <- function(nn,minlen=2,maxlen=8,len
                       ,chars=c(LETTERS,letters,0:9,0:9)){
   replicate(nn,paste0(sample(chars,sample(minlen:maxlen,1),rep=T)
@@ -437,4 +443,107 @@ simdata.character <- function(xx,nn=length(xx)){
     return(as.character(simdata.factor(factor(xx),nn)))};
   randomstr(nn);
 }
+
+# Project-specific functions ----
+# These functions will probably not be moved to a package because they make 
+# strong assumptions about file locations, variables, file-names, etc. and 
+# therefore would probably not work as expected outside this project template
+# framework.
+
+#' Load or render script dependencies if not already cached.
+#'
+#' @param deps        Character vector of script names.
+#' @param scriptdir   Where to look for each script.
+#' @param cachedir    Where to save the \code{SCRIPTNAME.R.rdata} output from
+#'                    each script and where to first look for cached results if
+#'                    they exist.
+#' @param fallbackdir Where to look for each script that is not found in
+#'                    \code{scriptdir}.
+#' @param envir       Environment in which to evaluate scripts (recommend
+#'                    leaving unaltered).
+#' @param loadfn      Function for loading \code{SCRIPTNAME.R.rdata} cached
+#'                    results
+#' @param rendfn      String with name of function to run on each of the files.
+#'                    If it's not from the \code{base} library it should be
+#'                    fully qualified (i.e. like the default value). The two
+#'                    anticipated values for this argument are
+#'                    \code{'rmarkdown::render'} for generating reports together
+#'                    with cached output and \code{'source'} for generating just
+#'                    the output. Other functions might also do useful things,
+#'                    but no guarantees.
+#' @param ...         Arguments to pass to the function specified in
+#'                    \code{rendfn} (advanced, could cause errors if
+#'                    certain arguments are used)
+#'
+#' @return Character vector of objects created and saved by the scripts that
+#'         have been loaded into the working environment.
+load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
+                      ,fallbackdir='scripts',envir=parent.frame()
+                      ,loadfn=if(exists('tload')) tload else load
+                      ,render=getOption('load_deps.render',TRUE)
+                      ,...){
+  if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
+  # what objects got loaded by this function
+  loadedobj=c();
+  for(ii in deps){
+    # if a cached .rdata file for this dependency cannot be found...
+    if(is.null(iicached<-find_path(paste0(ii,'.rdata')
+                                   ,c(cachedir,scriptdir,fallbackdir))) ||
+       # or if render is requested AND the html is not found...
+       (render && is.null(find_path(gsub('\\.r$','.html',ii,ignore.case = TRUE)
+                                    ,c(cachedir,scriptdir,fallbackdir))))){
+      # run that script and create one
+      if(!is.null(iiscript<-find_path(ii,c(scriptdir,fallbackdir)))){
+        # TODO: modify all files to write their cached results to a user
+        # specified path if one is provided
+        message(sprintf('Trying to initialize cache using script %s'
+                        ,iiscript));
+        # if rendering the scriports and not just running them
+        cmd <- if(render){
+          sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
+                  ,normalizePath(cachedir)
+                  ,normalizePath(iiscript))} else {
+          sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
+                  ,normalizePath(cachedir)
+                  ,normalizePath(iiscript))};
+        message('load_deps.render:',getOption('load_deps.render'));
+        message('About to run:\n',cmd,'\n');
+        .junk <- system(cmd,intern = TRUE);
+        # again try to find a valid path to it
+        iicached <- find_path(paste0(ii,'.rdata')
+                              ,c(cachedir,scriptdir,fallbackdir));
+      } else{
+        # if cannot find script, error
+        stop(sprintf('The script %s was not found',ii));
+      }};
+    # if there is still no cached .rdata found, error
+    if(is.null(iicached)){
+      stop(sprintf('The cached file for %s could not be found',iiscript));
+      # otherwise, the cached .rdata now exists one way or another, load it
+    } else {
+      loadedobj <- union(loadedobj,loadfn(normalizePath(iicached),envir=envir));
+      message(sprintf('Loaded data for %s from %s',ii,iicached));
+    };
+  }
+  return(loadedobj);
+}
+
+find_path <- function(file,paths=c('.','..')){
+  # get the basename of the file
+  filebase <- basename(file);
+  # generate a search-paths for this file, starting with the path component
+  # of 'file'
+  filedirs <- if(filebase!=file) dirname(file) else c();
+  filedirs <- normalizePath(unique(c(filedirs,paths)));
+  # return the first full path in which the file is found to exist
+  for(ii in file.path(filedirs,filebase)) if(file.exists(ii)) return(ii);
+  return(c());
+}
+
+current_scriptname <- function(default='INTERACTIVE_SESSION.R'
+                               ,.scriptname=parent.frame(3)$ofile){
+  return(c(.scriptname,gsub('\\.spin\\.Rmd$','.R',knitr::current_input())
+           ,default)[1])};
+
+
 c()
