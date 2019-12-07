@@ -378,7 +378,7 @@ smartlog <- function(value,comment,file='.logfile'){
   if(!file.exists(file)) cat('list(',file=file) else {
     cat('\n,',file=file,append=TRUE)};
   if(is.numeric(value)) cat(value,file=file,append=TRUE) else {
-    cat('"',value,'"',file=file,append=TRUE)};
+    cat('"',value,'"',file=file,sep = '',append=TRUE)};
   if(!missing(comment)) cat(' #',comment,file=file,append=TRUE)};
 
 #' Internal function used by \code{simdata} for creating random labels for 
