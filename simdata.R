@@ -22,8 +22,6 @@ outputsims <- setNames(file.path('data',basename(inputdata)),names(inputdata));
 message('**** outputsims: ',paste0(outputsims,collapse=','));
 # remove the ones that are remote links
 outputsims <- outputsims[!grepl('^(ftp|https?)://',outputsims)];
-message('**** normalized outputsims: '
-        ,paste0(normalizePath(file.path(.workdir,outputsims)),collapse=','));
 # remove the ones that already exist in the shared directory
 outputsims <- outputsims[!file.exists(normalizePath(file.path(.workdir
                                                               ,outputsims)
@@ -39,7 +37,7 @@ if(length(outputsims)>0){
     source(normalizePath(file.path('scripts','snippets.R')))};
   inputsimdata <- inputdata;
   inputsimdata[names(outputsims)] <- outputsims;
-  newconfigr <- filesections('config.R');
+  newconfigr <- filesections(normalizePath(file.path(.workdir,'config.R')));
   newconfigr$inputdata <- paste0(.snippets$config_inputdata
                                  ,'c(\n  ',paste(sprintf("%s = '%s'"
                                                          ,names(inputsimdata)
