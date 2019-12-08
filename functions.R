@@ -519,7 +519,9 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                         ,iiscript));
         # if rendering the scriports and not just running them
         cmd <- if(render){
-          sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
+          # TODO: Remove or parameterize clean=FALSE after the simdata probelm
+          #       is fixed
+          sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',clean=FALSE,output_dir=\'%1$s\');"'
                   ,normalizePath(cachedir)
                   ,normalizePath(iiscript))} else {
           sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
