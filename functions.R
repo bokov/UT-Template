@@ -407,9 +407,9 @@ smartlog <- function(value,comment,file='.logfile'){
 #' discrete variables
 makevarmap <- function(dt){
   data.frame(origname=colnames(dt)
-             ,varname=smartsetnames(names = tolower(colnames(dt)),pre=var
+             ,varname=smartsetnames(names = tolower(colnames(dt)),namepre='var'
                                     ,maxlen = 20)
-             ,dispname=smartsetnames(names=colnames(dt),pre=Var,maxlen=40
+             ,dispname=smartsetnames(names=colnames(dt),namepre='Var',maxlen=40
                                      ,illegalchars="[^[:alnum:] _.,':]")
              ,comment=NA)};
 
