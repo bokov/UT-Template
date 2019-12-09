@@ -50,7 +50,6 @@ if(!exists('.debug')) .debug <- 0;
 if(!exists('.projpackages')) .projpackages <- c('');
 if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
 if(!exists('.deps')) .deps <- c('');
-if(!exists('.workdir')) .workdir <- dirname(.configpath);
 
 # 
 if(!require('devtools')){
@@ -142,6 +141,8 @@ if(is.null(.configpath)){
        ,'\'inputdata\' variable is the full path to your data file on your '
        ,'local computer, back up your config.R to some local location outside '
        ,'this repository, and then try running this script again.')};
+
+if(!exists('.workdir')) .workdir <- dirname(.configpath);
 
 source(.configpath);
 .configlocal <- file.path(dirname(.configpath),'local.config.R');
