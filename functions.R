@@ -112,6 +112,28 @@ try_import <- function(file,which=1,
   return(out)
 }
 
+#' One stop shop for making execution actually quiet.
+#'
+#' @param expr      Expression to evaluate
+#' @param warnings  If \code{TRUE} suppress warnings
+#' @param messages  If \code{TRUE} suppress messages
+#' @param startup   If \code{TRUE} suppress package startup messages
+#' @param capture   If \code{TRUE} capture any output and return it wrapped in
+#'                  \code{invisible()}
+#'
+#' @return Either NULL or a character string.
+#' @export
+#'
+#' @examples suppress(library(survival))
+suppress <- function(expr,warnings=TRUE,messages=TRUE,startup=TRUE
+                     ,capture=FALSE){
+  f1 <- if(warnings) suppressWarnings else identity;
+  f2 <- if(messages) suppressMessages else identity;
+  f3 <- if(startup) suppressPackageStartupMessages else identity;
+  f4 <- if(capture) function(xx) invisible(capture.output(xx)) else return;
+  f4(f3(f2(f1(expr))));
+}
+
 #' Checks to see if there is an option with the user-specified name, and
 #' if there isn't, creates one with the user-specified default. Returns the 
 #' final value of that option.
@@ -491,6 +513,10 @@ simdata.character <- function(xx,nn=length(xx)){
 #'                    with cached output and \code{'source'} for generating just
 #'                    the output. Other functions might also do useful things,
 #'                    but no guarantees.
+#' @param debug       Integer. The higher the value, the more information is 
+#'                    returned to the console or report. For now the only check
+#'                    done on it is whether it is \code{>0} (default is 
+#'                    \code{0}).
 #' @param ...         Arguments to pass to the function specified in
 #'                    \code{rendfn} (advanced, could cause errors if
 #'                    certain arguments are used)
@@ -501,6 +527,7 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                       ,fallbackdir='scripts',envir=parent.frame()
                       ,loadfn=if(exists('tload')) tload else load
                       ,render=getOption('load_deps.render',TRUE)
+                      ,debug=0
                       ,...){
   if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
   # what objects got loaded by this function
@@ -526,9 +553,10 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
           sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
                   ,normalizePath(cachedir)
                   ,normalizePath(iiscript))};
-        message('load_deps.render:',getOption('load_deps.render'));
-        message('About to run:\n',cmd,'\n');
-        .junk <- system(cmd,intern = TRUE);
+        if(debug>0) message('load_deps.render:',getOption('load_deps.render'));
+        if(debug>0) message('About to run:\n',cmd,'\n');
+        if(debug==0) .junk <- suppress(system(cmd,intern = TRUE)) else {
+          system(cmd,intern=TRUE)};
         # again try to find a valid path to it
         iicached <- find_path(paste0(ii,'.rdata')
                               ,c(cachedir,scriptdir,fallbackdir));
