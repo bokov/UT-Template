@@ -44,18 +44,33 @@ if(!file.exists('functions.R')){
       setwd(.response)};
   }
 }
+#' ## Set variables that may vary from one script to another, if they are 
+#' not already set in the calling script
+if(!exists('.debug')) .debug <- 0;
+if(!exists('.projpackages')) .projpackages <- c('');
+if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
+if(!exists('.deps')) .deps <- c('');
+if(!exists('.workdir')) .workdir <- dirname(.configpath);
+
+# 
+if(!require('devtools')){
+  install.packages('devtools',dependencies=TRUE,quiet=.debug==0
+                   ,repos=getOption('repos','https://cran.rstudio.com'))};
+#devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
+devtools::install_github('bokov/tidbits',ref='integration'
+                         ,quiet= .debug == 0); 
+library(tidbits);
+devtools::install_github('bokov/rio',ref='master'
+                         ,quiet= .debug == 0); 
+library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
+library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
+
 #+ echo=F
 # local_functions ----
 #' ## Load some local functions
 #+ warning=FALSE, message=FALSE
 if(file.exists('functions.R')) source('functions.R');
-# Now that we are managing trailR as a standalone package, need devtools
-if(!require('devtools')){
-  install.packages('devtools',dependencies=TRUE
-                   ,repos=getOption('repos','https://cran.rstudio.com'))};
-#devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
-devtools::install_github('bokov/tidbits',ref='integration'); library(tidbits);
-devtools::install_github('bokov/rio',ref='master'); library(rio);
+
 #+ echo=F
 # libs -------------------------------------------------------------------------
 #' ## Libraries
@@ -149,13 +164,6 @@ file_args$skip <- n_skip;
 #' That is to say, variables which can be set without reference to the data 
 #' and do not take a lot of time to do.
 #' 
-#' ## Set variables that may vary from one script to another, if they are 
-#' not already set in the calling script
-if(!exists('.debug')) .debug <- 0;
-if(!exists('.projpackages')) .projpackages <- c('');
-if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
-if(!exists('.deps')) .deps <- c('');
-if(!exists('.workdir')) .workdir <- dirname(.configpath);
 
 options(tb.retcol='column');
 #' data dictionary template-- metadata that should persist accross multiple 
@@ -180,23 +188,25 @@ globalsearchrep <- rbind(
   c('\\[[0-9,]+ facts; [0-9,]+ patients\\]','')
 );
 
-#+ echo=F
+#+ echo=FALSE
 # urls ----
 urls <- list(
   # TSCI 5050 website
   git_site='https://github.com/bokov/2019-FA-TSCI-5050'
   );
 
-#+ echo=F,eval=F
+#+ echo=FALSE,eval=F
 # script-specific packages ----
-if(length(setdiff(.projpackages,'') > 0)) instrequire(.projpackages);
+if(length(setdiff(.projpackages,'') > 0)) if(.debug==0) {
+  .junk <- suppress(instrequire(.projpackages));
+} else instrequire(.projpackages);
 # start logging ----
 #if(exists('tself')) tself(scriptname=.currentscript);
 # run scripts on which this one depends ----
 # if any that have not been cached yet
 setwd(.workdir);
 #.loadedobjects <- tidbits:::load_deps(.deps,cachedir = .workdir);
-.loadedobjects <- load_deps2(.deps,cachedir = .workdir);
+.loadedobjects <- load_deps2(.deps,cachedir = .workdir,debug=.debug);
 # files already existing ----
-.origfiles <- ls(all=T);
+.origfiles <- ls(all=TRUE);
 c()
