@@ -12,17 +12,20 @@ debug <- 1;
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .currentscript <- current_scriptname('simdata.R');
-#' Saving original file-list so we don't keep exporting functions and 
-#' environment variables to other scripts
-#' 
 #### simulate data ####
 outputsims <- setNames(file.path('data',basename(inputdata)),names(inputdata));
-# remove the ones that are remote links
+#' Don't simulate files that are remote internet links
 outputsims <- outputsims[!grepl('^(ftp|https?)://',outputsims)];
-# remove the ones that already exist in the shared directory
+#' Don't simulate files that already exist in the shared directory
 outputsims <- outputsims[!file.exists(normalizePath(file.path(.workdir
                                                               ,outputsims)
                                                     ,mustWork = FALSE))];
+#' Patch for a format that is only supported for import, not export
+outputsims <- gsub('\\.xls$','.xlsx',ignore.case = TRUE,outputsims);
+
+#' Save out the simulated (and thus shareable) versions of the above files to
+#' the `data` directory in the same format as the originals where possible
+#' and then also save out the newly created data for debug purposes
 simrawdata <- list();
 if(length(outputsims)>0){
   for(ii in names(outputsims)){
