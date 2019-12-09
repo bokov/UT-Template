@@ -610,6 +610,7 @@ choose_predictors <- function(dat,criteria=c_safe,nmax=3,random=TRUE
   out <- choose_outcomes(dat,criteria=criteria,nmax=nmax,random=random
                          ,exclude=exclude);
   comment(out) <- gsub('outcome','predictor',comment(out));
+  out;
 }
 
 
