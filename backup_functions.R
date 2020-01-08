@@ -3,14 +3,15 @@
 # Credit: 
 # http://conjugateprior.org/2015/06/identifying-the-os-from-r/
 get_os <- function(){ # nodeps
-  sysinf <- Sys.info();
-  if (!is.null(sysinf)){
-    os <- sysinf['sysname'];
-    if (os == 'Darwin') os <- "osx";
-  } else { ## mystery machine
-    os <- .Platform$OS.type;
-    if (grepl("^darwin", R.version$os)) os <- "osx";
-    if (grepl("linux-gnu", R.version$os)) os <- "linux";
+  if(Sys.getenv('R_CONFIG_ACTIVE')=='rstudio_cloud') os <- "rscloud" else {
+    if (!is.null(sysinf <- Sys.info())){
+      os <- sysinf['sysname'];
+      if (sysinf['sysname'] == 'Darwin') os <- "osx";
+    } else { ## mystery machine
+      os <- .Platform$OS.type;
+      if (grepl("^darwin", R.version$os)) os <- "osx"
+      else if (grepl("linux-gnu", R.version$os)) os <- "linux";
+    }
   }
   tolower(os);
 };

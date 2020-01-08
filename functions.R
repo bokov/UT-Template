@@ -1,6 +1,23 @@
 # This is the file where custom functions, if any are needed, should be defined.
 library(methods);
 
+# Needed pre-library install ----
+# Credit: 
+# http://conjugateprior.org/2015/06/identifying-the-os-from-r/
+get_os <- function(){ # nodeps
+  if(Sys.getenv('R_CONFIG_ACTIVE')=='rstudio_cloud') os <- "rscloud" else {
+    if (!is.null(sysinf <- Sys.info())){
+      os <- sysinf['sysname'];
+      if (sysinf['sysname'] == 'Darwin') os <- "osx";
+    } else { ## mystery machine
+      os <- .Platform$OS.type;
+      if (grepl("^darwin", R.version$os)) os <- "osx"
+      else if (grepl("linux-gnu", R.version$os)) os <- "linux";
+    }
+  }
+  tolower(os);
+};
+
 # Generalizable functions ----
 # (might be moved to tidbits/SPURS in the future)
 #' Determine whether a file is "plain-text" or some sort of binary format
@@ -546,11 +563,14 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
         message(sprintf('Trying to initialize cache using script %s'
                         ,iiscript));
         # if rendering the scriports and not just running them
+        rcmd <- if(get_os() == 'windows') 'Rscript' else 'R';
         cmd <- if(render){
-          sprintf('Rscript --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
+          sprintf('%1$s --no-restore -e ".workdir<-\'%2$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%3$s\',output_dir=\'%2$s\');"'
+                  ,rcmd
                   ,normalizePath(cachedir,winslash='/')
                   ,normalizePath(iiscript,winslash='/'))} else {
-          sprintf('Rscript --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
+          sprintf('%1$s --no-restore -e ".workdir<-\'%2$s\';options(load_deps.render=FALSE);source(\'%3$s\',chdir=TRUE)"'
+                  ,rcmd
                   ,normalizePath(cachedir,winslash='/')
                   ,normalizePath(iiscript,winslash='/'))};
         if(debug>0) message('load_deps.render:',getOption('load_deps.render'));
