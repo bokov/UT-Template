@@ -160,7 +160,7 @@ for(ii in seq_along(inputdata)){
   if(is.null(.iipath<-tidbits::find_filepath(inputdata[ii]))){
     stop('Cannot find file ',inputdata[ii])} else {
       inputdata[ii] <- .iipath}};
-inputdata <- normalizePath(inputdata,winslash='/')
+inputdata <- setNames(normalizePath(inputdata,winslash='/'),names(inputdata));
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
