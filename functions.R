@@ -547,10 +547,10 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                         ,iiscript));
         # if rendering the scriports and not just running them
         cmd <- if(render){
-          sprintf('Rterm --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
+          sprintf('Rscript --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
                   ,normalizePath(cachedir,winslash='/')
                   ,normalizePath(iiscript,winslash='/'))} else {
-          sprintf('Rterm --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
+          sprintf('Rscript --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
                   ,normalizePath(cachedir,winslash='/')
                   ,normalizePath(iiscript,winslash='/'))};
         if(debug>0) message('load_deps.render:',getOption('load_deps.render'));
