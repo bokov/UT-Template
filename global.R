@@ -21,10 +21,10 @@ cwd <- getwd(); cwd;
 #' If `global.R` isn't found, try to find it
 if(!file.exists('functions.R')){
   message('Attempting to track down global.R file...');
-  start <- normalizePath('..');
+  start <- normalizePath('..',winslash='/');
   .corefiles <- '(functions|global|dictionary|example_config).R';
-  .candidatedirs <- unique(dirname(file.path(normalizePath('..')
-                                             ,list.files(normalizePath('..')
+  .candidatedirs <- unique(dirname(file.path(normalizePath('..',winslash='/')
+                                             ,list.files(normalizePath('..',winslash='/')
                                                          ,pattern=.corefiles
                                                          ,recursive=T))));
   if(length(.candidatedirs)==0) stop('You are missing required files. '
@@ -63,8 +63,6 @@ library(tidbits);
 devtools::install_github('bokov/rio',ref='master'
                          ,quiet= .debug == 0); 
 library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
-#' Need to install support for additional formats users might need
-rio::install_formats(repos = getOption("repos", "https://cran.rstudio.com/"));
 library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
 
 #+ echo=F
@@ -158,6 +156,7 @@ for(ii in seq_along(inputdata)){
   if(is.null(.iipath<-tidbits::find_filepath(inputdata[ii]))){
     stop('Cannot find file ',inputdata[ii])} else {
       inputdata[ii] <- .iipath}};
+inputdata <- normalizePath(inputdata,winslash='/')
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
