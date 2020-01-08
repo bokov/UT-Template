@@ -63,6 +63,8 @@ library(tidbits);
 devtools::install_github('bokov/rio',ref='master'
                          ,quiet= .debug == 0); 
 library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
+#' Need to install support for additional formats users might need
+rio::install_formats(repos = getOption("repos", "https://cran.rstudio.com/"));
 library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
 
 #+ echo=F
