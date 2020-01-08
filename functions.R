@@ -282,7 +282,7 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
           return(cancelvalue)};
       } else {
         # in case somebody tries to quote their file name
-        out <- gsub('^[\'"]|[\'"]$','',out);
+        out <- normalizePath(gsub('^[\'"]|[\'"]$','',out),winslash='/');
         if(file.exists(out)&&!file.info(out)$isdir){
           smartlog(out,deparse(match.call()));return(out)};
         if(!file.exists(out)) message(sprintf(
@@ -547,12 +547,12 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                         ,iiscript));
         # if rendering the scriports and not just running them
         cmd <- if(render){
-          sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
-                  ,normalizePath(cachedir)
-                  ,normalizePath(iiscript))} else {
-          sprintf('R --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
-                  ,normalizePath(cachedir)
-                  ,normalizePath(iiscript))};
+          sprintf('Rterm --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=TRUE);rmarkdown::render(\'%2$s\',output_dir=\'%1$s\');"'
+                  ,normalizePath(cachedir,winslash='/')
+                  ,normalizePath(iiscript,winslash='/'))} else {
+          sprintf('Rterm --no-restore -e ".workdir<-\'%1$s\';options(load_deps.render=FALSE);source(\'%2$s\',chdir=TRUE)"'
+                  ,normalizePath(cachedir,winslash='/')
+                  ,normalizePath(iiscript,winslash='/'))};
         if(debug>0) message('load_deps.render:',getOption('load_deps.render'));
         if(debug>0) message('About to run:\n',cmd,'\n');
         if(debug==0) .junk <- suppress(system(cmd,intern = TRUE)) else {
@@ -569,7 +569,7 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
       stop(sprintf('The cached file for %s could not be found',iiscript));
       # otherwise, the cached .rdata now exists one way or another, load it
     } else {
-      loadedobj <- union(loadedobj,loadfn(normalizePath(iicached),envir=envir));
+      loadedobj <- union(loadedobj,loadfn(normalizePath(iicached,winslash='/'),envir=envir));
       message(sprintf('Loaded data for %s from %s',ii,iicached));
     };
   }
@@ -582,7 +582,7 @@ find_path <- function(file,paths=c('.','..')){
   # generate a search-paths for this file, starting with the path component
   # of 'file'
   filedirs <- if(filebase!=file) dirname(file) else c();
-  filedirs <- normalizePath(unique(c(filedirs,paths)));
+  filedirs <- unique(normalizePath(c(filedirs,paths),winslash='/'));
   # return the first full path in which the file is found to exist
   for(ii in file.path(filedirs,filebase)) if(file.exists(ii)) return(ii);
   return(c());

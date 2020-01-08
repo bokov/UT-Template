@@ -17,8 +17,7 @@ outputsims <- setNames(file.path('data',basename(inputdata)),names(inputdata));
 #' Don't simulate files that are remote internet links
 outputsims <- outputsims[!grepl('^(ftp|https?)://',outputsims)];
 #' Don't simulate files that already exist in the shared directory
-outputsims <- outputsims[!file.exists(normalizePath(file.path(.workdir
-                                                              ,outputsims)
+outputsims <- outputsims[!file.exists(normalizePath(file.path(.workdir,outputsims),winslash = '/'
                                                     ,mustWork = FALSE))];
 #' Patch for a format that is only supported for import, not export
 outputsims <- gsub('\\.xls$','.xlsx',ignore.case = TRUE,outputsims);
@@ -30,19 +29,19 @@ simrawdata <- list();
 if(length(outputsims)>0){
   for(ii in names(outputsims)){
     export(simrawdata[[ii]] <- simdata(rawdata[[ii]])
-           ,normalizePath(file.path(.workdir,outputsims[[ii]])
+           ,normalizePath(file.path(.workdir,outputsims[[ii]]),winslash='/'
                           ,mustWork = FALSE))};
   if(file.exists('snippets.R')) source('snippets.R') else{
-    source(normalizePath(file.path('scripts','snippets.R')))};
+    source(normalizePath(file.path('scripts','snippets.R'),winslash='/'))};
   inputsimdata <- inputdata;
   inputsimdata[names(outputsims)] <- outputsims;
-  newconfigr <- filesections(normalizePath(file.path(.workdir,'config.R')));
+  newconfigr <- filesections(normalizePath(file.path(.workdir,'config.R'),winslash='/'));
   newconfigr$inputdata <- paste0(.snippets$config_inputdata
                                  ,'c(\n  ',paste(sprintf("%s = '%s'"
                                                          ,names(inputsimdata)
                                                          ,inputsimdata)
                                                  ,collapse='\n ,'),'\n);');
-  writeLines(unlist(newconfigr),normalizePath(file.path(.workdir,'config.R')
+  writeLines(unlist(newconfigr),normalizePath(file.path(.workdir,'config.R'),winslash='/'
                                               ,mustWork = FALSE));
 }
 
