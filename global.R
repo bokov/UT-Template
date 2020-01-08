@@ -63,7 +63,11 @@ library(tidbits);
 devtools::install_github('bokov/rio',ref='master'
                          ,quiet= .debug == 0); 
 library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
+rio::install_formats(quiet=.debug==0
+                     ,repos=getOption('repos','https://cran.rstudio.com'))
 library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
+
+
 
 #+ echo=F
 # local_functions ----
