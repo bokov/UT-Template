@@ -58,7 +58,6 @@ if(.updaterawdata) attr(rawdata[[1]],'tblinfo') <- tblinfo(rawdata[[1]]);
 #### save out ####
 #' ## Save all the processed data to an rdata file 
 #' 
-#' ...which includes the audit trail
 suppressWarnings(with(rawdata
                       ,save(file=file.path(.workdir
                                            ,paste0(basename(.currentscript)

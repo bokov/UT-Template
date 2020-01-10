@@ -49,7 +49,6 @@ if(length(outputsims)>0){
 #### save out ####
 #' ## Save all the processed data to an rdata file 
 #' 
-#' ...which includes the audit trail
 suppressWarnings(save(file=file.path(.workdir,paste0(basename(.currentscript)
                                                    ,'.rdata'))
                       ,list=setdiff(ls(),c('ii','inputsimdata',.origfiles))));
