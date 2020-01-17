@@ -1,18 +1,18 @@
 #' ---
 #' title: "Build Data Dictionary"
-#' author: 
+#' author:
 #' - "Alex F. Bokov^[UT Health, Department of Epidemiology and Biostatistics]"
 #' date: "09/14/2018"
 #' ---
-#' 
+#'
 #+ message=F,echo=F
 # init ----
 debug <- 0;
-.deps <- c( 'data.R' ); 
+.deps <- c( 'data.R' );
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
 .currentscript <- current_scriptname('dictionary.R');
-#' Saving original file-list so we don't keep exporting functions and 
+#' Saving original file-list so we don't keep exporting functions and
 #' environment variables to other scripts
 .origfiles <- ls();
 #+ echo=FALSE
@@ -33,7 +33,7 @@ for(ii in names(rawdata)){
 #+ data_dct
 for(ii in names(rawdata)) attr(rawdata[[ii]],'tblinfo') <- tblinfo(rawdata[[ii]]);
 .updaterawdata <- FALSE;
-#' If necessary, create demonstration variables so the scripts that need 
+#' If necessary, create demonstration variables so the scripts that need
 #' some kind of predictors and outcomes don't crash the first time they run
 if(length(v(c_safetf,rawdata[[1]]))==0){
   .updaterawdata <- TRUE;
@@ -56,11 +56,12 @@ if(length(setdiff(v(c_safe,rawdata[[1]]),c(v(c_safetf,rawdata[[1]])
 if(.updaterawdata) attr(rawdata[[1]],'tblinfo') <- tblinfo(rawdata[[1]]);
 #+ echo=FALSE
 #### save out ####
-#' ## Save all the processed data to an rdata file 
-#' 
+#' ## Save all the processed data to an rdata file
+#'
 suppressWarnings(with(rawdata
                       ,save(file=file.path(.workdir
                                            ,paste0(basename(.currentscript)
-                                                   ,'.rdata')),list=ls())));
+                                                   ,'.rdata'))
+                            ,list=c(ls(),'map0'))));
 #+ echo=F,eval=F
 c()
