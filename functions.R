@@ -503,6 +503,16 @@ simdata.character <- function(xx,nn=length(xx)){
   randomstr(nn);
 }
 
+# Sampling data ----
+subsample <- function(xx,prob=c(.5,.5)){
+  setNames(split(xx,sample(seq_along(prob),size=length(xx)
+                           ,replace = TRUE,prob = prob))
+           ,sprintf('subsample%03d',seq_along(prob)))}
+
+resample <- function(xx,nn=5){
+  setNames(replicate(nn,sample(xx,size=length(xx),replace=TRUE),simplify=FALSE)
+           ,sprintf('resample%03d',seq_len(nn)))}
+
 # Project-specific functions ----
 # These functions will probably not be moved to a package because they make 
 # strong assumptions about file locations, variables, file-names, etc. and 
