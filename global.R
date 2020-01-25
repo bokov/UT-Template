@@ -14,8 +14,8 @@
 #' ## Figure out where we are and set the upstream repository
 #' 
 #' Upstream repo
-options('git.upstream','git@github.com:bokov/2019-FA-TSCI-5050');
-options('repos','https://cloud.r-project.org');
+options(git.upstream='git@github.com:bokov/2019-FA-TSCI-5050');
+options(repos=c(CRAN='https://cloud.r-project.org'));
 #' get current working directory
 cwd <- getwd(); cwd;
 #' If `global.R` isn't found, try to find it
