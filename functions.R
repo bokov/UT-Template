@@ -2,7 +2,7 @@
 library(methods);
 
 # Needed pre-library install ----
-# Credit: 
+# Credit:
 # http://conjugateprior.org/2015/06/identifying-the-os-from-r/
 get_os <- function(){ # nodeps
   if(Sys.getenv('R_CONFIG_ACTIVE')=='rstudio_cloud') os <- "rscloud" else {
@@ -152,7 +152,7 @@ suppress <- function(expr,warnings=TRUE,messages=TRUE,startup=TRUE
 }
 
 #' Checks to see if there is an option with the user-specified name, and
-#' if there isn't, creates one with the user-specified default. Returns the 
+#' if there isn't, creates one with the user-specified default. Returns the
 #' final value of that option.
 #'
 #' @param name    The option that should exist.
@@ -181,7 +181,7 @@ optinit <- function(name='.stacks',default=new.env()){
 #'
 #' @examples
 #' stack(letters)
-#' 
+#'
 stack <- function(xx,name){
   stacks<-optinit('.stacks',new.env());
   if(missing(name)) name <- make.names(as.character(substitute(xx)));
@@ -217,24 +217,24 @@ pop <- function(xx,fallback=NULL){
 #' A wrapper for R's built-in menu with additional features.
 #'
 #' @param choices       Passed to \code{menu}
-#' @param batchmode     If given, this is the value that this function will 
+#' @param batchmode     If given, this is the value that this function will
 #'                      return without displaying a menu if \code{interactive()}
 #'                      is \code{FALSE}
-#' @param autoresponse  If given, this is the value that this function will 
+#' @param autoresponse  If given, this is the value that this function will
 #'                      return without displaying a menu OR checking whether its
-#'                      in an interactive environment. This is a hook for 
+#'                      in an interactive environment. This is a hook for
 #'                      automated testing and CI use-cases.
 #' @param title         Passed to \code{menu}
-#' @param usenames      If \code{TRUE} (default) and \code{choices} has a 
+#' @param usenames      If \code{TRUE} (default) and \code{choices} has a
 #'                      \code{names} attribute then prepend names to choices
 #' @param namepattern   If \code{usenames} is \code{TRUE} and there are names,
-#'                      combine them with values using this \code{sprintf} 
+#'                      combine them with values using this \code{sprintf}
 #'                      pattern
 #' @param graphics      Passed to \code{menu}
-#' @param extramessage  Message that prints before the title of the menu. Or a 
-#'                      function that will be executed before the menu is 
+#' @param extramessage  Message that prints before the title of the menu. Or a
+#'                      function that will be executed before the menu is
 #'                      invoked.
-#' @param ignorezero    If \code{TRUE} then instead of exiting, the menu will 
+#' @param ignorezero    If \code{TRUE} then instead of exiting, the menu will
 #'                      re-display if the user chooses \code{0}
 #' @param ignorezeromsg Message to send if \code{ignorezero} is \code{TRUE} and
 #'                      0 has been typed.
@@ -246,7 +246,7 @@ pop <- function(xx,fallback=NULL){
 #' smartmenu(month.name)
 #' smartmenu(month.name,batchmode=4)
 #' smartmenu(month.name,batchmode=4,autoresponse=10)
-#' 
+#'
 smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
                       ,namepattern='%s\t-\t%s',graphics=FALSE,extramessage=c()
                       ,ignorezero=TRUE,ignorezeromsg='This is a required value'
@@ -268,12 +268,12 @@ smartmenu <- function(choices,batchmode=1,autoresponse,title=NULL,usenames=TRUE
 
 #' A wrapper for \code{file.choose()} that's friendly to automated testing.
 #'
-#' @param batchmode    If given, this is the value that this function will 
+#' @param batchmode    If given, this is the value that this function will
 #'                     return without displaying a menu if \code{interactive()}
 #'                     is \code{FALSE}
-#' @param autoresponse If given, this is the value that this function will 
+#' @param autoresponse If given, this is the value that this function will
 #'                     return without displaying a menu OR checking whether its
-#'                     in an interactive environment. This is a hook for 
+#'                     in an interactive environment. This is a hook for
 #'                     automated testing and CI use-cases.
 #' @param ignorecancel If the user cancels, continue asking for a file.
 #' @param cancelvalue  What to return if \code{ignorecancel} is \code{FALSE}
@@ -311,7 +311,7 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
     # out <- try(file.choose(),silent = TRUE);
     # if(ignorecancel){
     #   while(methods::is(out,'try-error')){
-    #     
+    #
     #     out <- try(file.choose(),silent=TRUE);
     #     }
     #   } else if(methods::is(out,'try-error')){
@@ -326,13 +326,13 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
 #' A more customizable way to generate guaranteed legal and unique names
 #'
 #' @param xx           An object that has names, only required argument
-#' @param names        Character vector of proposed names for the object 
+#' @param names        Character vector of proposed names for the object
 #' @param namepre      The prefix to assign to auto-generated names
-#' @param namepad      How many zeros to use for padding numeric infixes of 
+#' @param namepad      How many zeros to use for padding numeric infixes of
 #'                     auto-generated names
 #' @param namesuf      The suffix to assign to auto-generated names
 #' @param maxlen       The maximum length to which input names will be truncated
-#' @param illegalchars A regexp matching characters that will be removed from 
+#' @param illegalchars A regexp matching characters that will be removed from
 #'                     names
 #' @param namepattern  The \code{sprintf} pattern for auto-generated names. If
 #'                     used, \code{namepre}, \code{namepad}, and \code{namesuf}
@@ -341,24 +341,24 @@ smartfilechoose <- function(batchmode='',autoresponse,ignorecancel=TRUE
 #' @param nameprevious Pattern for recognizing existing auto-generated names,
 #'                     to prevent endless loops.
 #'
-#' @return If \code{xx} provided, that object with legal and unique names. 
+#' @return If \code{xx} provided, that object with legal and unique names.
 #'         Otherwise, just the names.
 #' @export
 #'
 #' @examples
-#' 
+#'
 #' junknames <- replicate(26,paste0(sample(c(letters,LETTERS
 #'                                           ,0:9
 #'                                           ,c('.',' ','\t','\n','|','_','=',':',';','/'))
 #'                                           ,sample(0:10,1),rep=TRUE),collapse=''))
 #' junknames
-#' 
+#'
 #' smartsetnames(names=junknames)
-#' 
+#'
 #' namedobj <- setNames(LETTERS,junknames)
-#' 
+#'
 #' smartsetnames(namedobj)
-#' 
+#'
 smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=2
                           ,namesuf='',maxlen=6
                           ,illegalchars='[^A-Za-z[:digit:]_]'
@@ -384,12 +384,12 @@ smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=2
 #' An automation-friendly wrapper for readline.
 #'
 #' @param prompt       Passed to \code{readline}
-#' @param batchmode    If given, this is the value that this function will 
+#' @param batchmode    If given, this is the value that this function will
 #'                     return without displaying a menu if \code{interactive()}
 #'                     is \code{FALSE}
-#' @param autoresponse If given, this is the value that this function will 
+#' @param autoresponse If given, this is the value that this function will
 #'                     return without displaying a menu OR checking whether its
-#'                     in an interactive environment. This is a hook for 
+#'                     in an interactive environment. This is a hook for
 #'                     automated testing and CI use-cases.
 #'
 #' @return The character string typed in at the keyboard or \code{autoresponse}
@@ -399,7 +399,7 @@ smartsetnames <- function(xx,names=base::names(xx),namepre='dat',namepad=2
 #' @examples
 #' smartreadline('Type something: ',batchmode='Nothing')
 #' smartreadline('Type something: ',autoresponse='Hello world')
-#' 
+#'
 smartreadline <- function(prompt,batchmode='',autoresponse){
   if(!missing(autoresponse) && !is.null(autoresponse)) return(autoresponse);
   if(interactive()){
@@ -420,7 +420,7 @@ smartlog <- function(value,comment,file='.logfile'){
     cat('"',value,'"',file=file,sep = '',append=TRUE)};
   if(!missing(comment)) cat(' #',comment,file=file,append=TRUE)};
 
-#' Internal function used by \code{simdata} for creating random labels for 
+#' Internal function used by \code{simdata} for creating random labels for
 #' discrete variables
 makevarmap <- function(dt){
   data.frame(origname=colnames(dt)
@@ -437,7 +437,7 @@ makevarmap <- function(dt){
 #'             rounded to the nearest 1e+10)
 #' @param dmax The highest number of decimal places to consider (by default,
 #'             rounded to the nearest 1e-20)
-#' @param tol  What fraction of the numbers have to be as precise or less 
+#' @param tol  What fraction of the numbers have to be as precise or less
 #'             precise than the selected decimal threshold (set to \code{1})
 #'             for all of them to be at or below the threshold.
 #'
@@ -457,6 +457,34 @@ decimals <- function(xx,dmin=-10,dmax=20,tol=.9){
                 ,decs[min(match(ii,decs)+1,length(decs))])){
     if(mean(xx==round(xx,jj))>=tol) break;}
   return(jj);
+}
+
+#' Converts XXX.XX-YY.YYY strings, possibly with alpha prefixes and suffixes,
+#' to numeric ranges when possible
+#' ... is passed to unprefsuf()
+ranges <- function(xx,sep='-',...){
+  out <- unprefsuf(strsplit(xx,sep)[[1]],...);
+  # if cannot parse, give up and return NA
+  if(length(out)!=2 ||
+     length(unique(attr(out,'prefs')))>1 ||
+     length(unique(attr(out,'suffs')))>1 ||
+     any(is.na(outnum<-as.numeric(out)))) return(xx);
+  outdec <- decimals(outnum);
+  outseq <- do.call(seq,as.list(c(setNames(sort(outnum),c('from','to'))
+                                  ,by=10^(-outdec))));
+  outseq <- sprintf(paste0('%.',outdec,'f'),outseq);
+  paste0(attr(out,'prefs'),outseq,attr(out,'suffs'));
+}
+
+#' Strip out prefixes and suffixes, return infix with the prefixes and suffixes
+#' as attributes
+unprefsuf <- function(xx,pattern="^([^0-9.-]*)([0-9.-]+)(.*$)"){
+  prefs <- gsub(pattern,'\\1',xx);
+  suffs <- gsub(pattern,'\\3',xx);
+  infxs <- gsub(pattern,'\\2',xx);
+  attr(infxs,'prefs') <- prefs;
+  attr(infxs,'suffs') <- suffs;
+  infxs;
 }
 
 #' Internal function used by \code{simdata}.
@@ -514,8 +542,8 @@ resample <- function(xx,nn=5){
            ,sprintf('resample%03d',seq_len(nn)))}
 
 # Project-specific functions ----
-# These functions will probably not be moved to a package because they make 
-# strong assumptions about file locations, variables, file-names, etc. and 
+# These functions will probably not be moved to a package because they make
+# strong assumptions about file locations, variables, file-names, etc. and
 # therefore would probably not work as expected outside this project template
 # framework.
 
@@ -540,9 +568,9 @@ resample <- function(xx,nn=5){
 #'                    with cached output and \code{'source'} for generating just
 #'                    the output. Other functions might also do useful things,
 #'                    but no guarantees.
-#' @param debug       Integer. The higher the value, the more information is 
+#' @param debug       Integer. The higher the value, the more information is
 #'                    returned to the console or report. For now the only check
-#'                    done on it is whether it is \code{>0} (default is 
+#'                    done on it is whether it is \code{>0} (default is
 #'                    \code{0}).
 #' @param ...         Arguments to pass to the function specified in
 #'                    \code{rendfn} (advanced, could cause errors if
