@@ -3,16 +3,16 @@
 #' author: "Alex F. Bokov"
 #' date: "10/18/2018"
 #' ---
-#' 
+#'
 #' This is a script that loads (and if needed, installs)
 #' libraries needed for this project, and sets a few global
 #' variables that will be needed by many different scripts.
 #' Keep this script minimalistic and *no number crunching here*
-#' 
+#'
 #+ echo=F
 # orient_paths ----
 #' ## Figure out where we are and set the upstream repository
-#' 
+#'
 #' Upstream repo
 options(git.upstream='git@github.com:bokov/2019-FA-TSCI-5050');
 options(repos=c(CRAN='https://cloud.r-project.org'));
@@ -45,23 +45,22 @@ if(!file.exists('functions.R')){
       setwd(.response)};
   }
 }
-#' ## Set variables that may vary from one script to another, if they are 
+#' ## Set variables that may vary from one script to another, if they are
 #' not already set in the calling script
 if(!exists('.debug')) .debug <- 0;
 if(!exists('.projpackages')) .projpackages <- c('');
 if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
 if(!exists('.deps')) .deps <- c('');
 
-# 
+#
 if(!require('devtools')){
   install.packages('devtools',dependencies=TRUE,quiet=.debug==0
                    ,repos=getOption('repos','https://cran.rstudio.com'))};
 #devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
 devtools::install_github('bokov/tidbits',ref='integration'
-                         ,quiet= .debug == 0); 
-library(tidbits);
+                         ,quiet= .debug == 0);
 devtools::install_github('bokov/rio',ref='master'
-                         ,quiet= .debug == 0); 
+                         ,quiet= .debug == 0);
 library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
 rio::install_formats(quiet=.debug==0
                      ,repos=getOption('repos','https://cran.rstudio.com'))
@@ -78,30 +77,30 @@ if(file.exists('functions.R')) source('functions.R');
 #+ echo=F
 # libs -------------------------------------------------------------------------
 #' ## Libraries
-#' 
+#'
 #' load and if necessary install needed libraries
 #+ warning=FALSE, message=FALSE
 instrequire(
   c(# just-in-time compilation
     # 'compiler'
-    
+
     # propensity scores and glm residuals
     #,'MatchIt','DHARMa'
-    
+
     # zero-inflated poisson, sigh
     #,'pscl'
-    
+
     # various analysis methods
-    #'survival' 
+    #'survival'
     #,'MASS','Hmisc','zoo','coin'
-    
+
     # evaluating predictive power
     #,'survAUC','survivalROC','pROC'
-    
+
     # for pd matrices needed by faker()
     #,'Matrix'
-    
-    # data manipulation & piping. 
+
+    # data manipulation & piping.
     # 'tools' was used by trailR.R
     # 'LaF' is used for fast and powerful reading of text files.
     #,'readr','dplyr','LaF','tools','openxlsx'
@@ -110,18 +109,18 @@ instrequire(
     # dummies breaks categoric variables into individual dummy variables
     #,'dummies'
     #,'lubridate'
-    
+
     # plotting
     #,'ggfortify','survminer'
     #,'ggplot2','grid','GGally','heatmap3','gridExtra','scales'
-    
+
     # string manipulation
     #,'stringi' #,'stringr'
-    
+
     # table formatting
     #,'pander','tableone','broom'
     #,'knitr','htmltab','stargazer','janitor'
-    
+
     # Web
     #,'RCurl','XML'
 ));
@@ -131,13 +130,13 @@ instrequire(
 #enableJIT(3);
 #+ echo=F
 # config ----
-#' ## Set variables that can get overridden by `config.R` if 
+#' ## Set variables that can get overridden by `config.R` if
 #' applicable (to avoid error messages if you don't have them in
 #' your `config.R`)
 n_skip <- 0;
 file_args <- list(check.names=T,blank.lines.skip=T);
 #' ## Load local config file
-#' 
+#'
 # local_config ----
 .configpath <- tidbits::find_filepath('config.R'
                                       ,pathexcl='[[:punct:]]backup\\.');
@@ -161,19 +160,20 @@ for(ii in seq_along(inputdata)){
     stop('Cannot find file ',inputdata[ii])} else {
       inputdata[ii] <- .iipath}};
 inputdata <- setNames(normalizePath(inputdata,winslash='/'),names(inputdata));
+if(.debug) message('Inputdata:\n\t',paste(inputdata,collapse=',\n\t'));
 #' Arguments to any/all file reading expressions (in addition to whatever
 #' is already done in config.R)
 file_args$skip <- n_skip;
 #+ echo=F
 # vars ----
 #' ## Set generic variables
-#' 
-#' That is to say, variables which can be set without reference to the data 
+#'
+#' That is to say, variables which can be set without reference to the data
 #' and do not take a lot of time to do.
-#' 
+#'
 
 options(tb.retcol='column');
-#' data dictionary template-- metadata that should persist accross multiple 
+#' data dictionary template-- metadata that should persist accross multiple
 #' versions of the data and data dictionary
 dctfile_tpl <- 'datadictionary_static.csv';
 #' checked-in file, with added rows and columns, ready-to-use FOR THIS DATASET
@@ -213,6 +213,7 @@ if(length(setdiff(.projpackages,'') > 0)) if(.debug==0) {
 # if any that have not been cached yet
 setwd(.workdir);
 #.loadedobjects <- tidbits:::load_deps(.deps,cachedir = .workdir);
+if(.debug) message('LOADING DEPENDENCIES');
 .loadedobjects <- load_deps2(.deps,cachedir = .workdir,debug=.debug);
 # files already existing ----
 .origfiles <- ls(all=TRUE);
