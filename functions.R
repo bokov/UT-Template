@@ -462,7 +462,7 @@ decimals <- function(xx,dmin=-10,dmax=20,tol=.9){
 #' Converts XXX.XX-YY.YYY strings, possibly with alpha prefixes and suffixes,
 #' to numeric ranges when possible
 #' ... is passed to unprefsuf()
-ranges <- function(xx,sep='-',...){
+ranges <- function(xx,sep='-',pad=2,...){
   out <- unprefsuf(strsplit(xx,sep)[[1]],...);
   # if cannot parse, give up and return NA
   if(length(out)!=2 ||
@@ -470,9 +470,11 @@ ranges <- function(xx,sep='-',...){
      length(unique(attr(out,'suffs')))>1 ||
      any(is.na(outnum<-as.numeric(out)))) return(xx);
   outdec <- decimals(outnum);
+  strpatt <- if(outdec > 0) paste0('%0',pad+outdec+1,'.',outdec,'f') else {
+    paste0('%0',pad,'.f')};
   outseq <- do.call(seq,as.list(c(setNames(sort(outnum),c('from','to'))
                                   ,by=10^(-outdec))));
-  outseq <- sprintf(paste0('%.',outdec,'f'),outseq);
+  outseq <- sprintf(strpatt,outseq);
   paste0(attr(out,'prefs'),outseq,attr(out,'suffs'));
 }
 
