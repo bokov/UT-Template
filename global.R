@@ -14,6 +14,7 @@
 #' ## Figure out where we are and set the upstream repository
 #'
 #' Upstream repo
+options(ripcord.startrun=getOption('ripcord.startrun',Sys.time()));
 options(git.upstream='git@github.com:bokov/2019-FA-TSCI-5050');
 options(repos=c(CRAN='https://cloud.r-project.org'));
 options(datatable.na.strings = getOption('datatable.na.strings'
@@ -57,7 +58,7 @@ if(!exists('.currentscript')) .currentscript <- 'UNKNOWN_SCRIPT';
 if(!exists('.deps')) .deps <- c('');
 
 #
-if(!require('devtools')){
+if(!require('devtools',quietly=.debug==0)){
   install.packages('devtools',dependencies=TRUE,quiet=.debug==0
                    ,repos=getOption('repos','https://cran.rstudio.com'))};
 #devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
