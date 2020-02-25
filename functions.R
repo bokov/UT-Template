@@ -630,7 +630,7 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
       # otherwise, the cached .rdata now exists one way or another, load it
     } else {
       loadedobj <- union(loadedobj,loadfn(normalizePath(iicached,winslash='/'),envir=envir));
-      message(sprintf('Loaded data for %s from %s',ii,iicached));
+      #message(sprintf('Loaded data for %s from %s',ii,iicached));
     };
   }
   return(loadedobj);
