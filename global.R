@@ -19,6 +19,7 @@ options(repos=c(CRAN='https://cloud.r-project.org'));
 options(datatable.na.strings = getOption('datatable.na.strings'
                                          ,c('NA','','.','-','(null)','NULL'
                                             ,'N/A','null')));
+options(datatable.integer64=getOption('datatable.integer64','character'));
 #' get current working directory
 cwd <- getwd(); cwd;
 #' If `global.R` isn't found, try to find it
