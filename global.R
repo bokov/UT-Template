@@ -86,7 +86,9 @@ if(file.exists('functions.R')) source('functions.R');
 #' load and if necessary install needed libraries
 #+ warning=FALSE, message=FALSE
 instrequire(
-  c(# just-in-time compilation
+  c(# argument validation
+    'checkmate'
+    # just-in-time compilation
     # 'compiler'
 
     # propensity scores and glm residuals
