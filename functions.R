@@ -22,6 +22,93 @@ get_os <- function(){ # nodeps
 # (might be moved to tidbits/SPURS in the future)
 #' Determine whether a file is "plain-text" or some sort of binary format
 #'
+#'
+#' A wrapper for \code{cut} that selects cut-points for equal counts rather than
+#' equal distances.
+#'
+#' @param xx             a numeric vector which is to be converted to a factor by cutting.
+#' @param bins           a single numeric variable indicating how many bins
+#' @param probs          Based on \code{bins} and passed to the \code{quantile}
+#'                       function. If cannot get \code{bins} to work, may need
+#'                       to specify this argument manually.
+#' @param ...            passed to \code{quantile} and \code{cut}. Good place to
+#'                       put a \code{labels} argument. Make sure that none of
+#'                       these optional arguments are \code{na.rm},
+#'                       \code{probs}, \code{names}, \code{x}, or \code{breaks}
+#'                       otherwise they will conflict with hardcoded arguments
+#'                       passed by this function.
+#' @param .error.recover If the number of breaks produces redundance quantiles
+#'                       (e.g. when a quarter of the values in \code{xx} are 0
+#'                       then the 25th percentile and all the quantiles smaller
+#'                       than it will be 0).
+#'
+#' @return  Factor or numeric vector.
+qcut <- function(xx,bins=3,probs=seq(0,1,length.out=round(bins)+1),...
+                 ,.error.recover=TRUE){
+  # validate arguments
+  checkmate::qassert(xx,'*>1');
+  if(not(checkmate::qtest(xx,'n>1'))){
+    warning("The 'xx' argument is not numeric. Not guaranteed to work.")};
+  checkmate::qassert(bins,'n+[2,]');
+  checkmate::qassert(probs, 'N>2[0,1]')
+  if(checkmate::test_names(.dotsnames <- names(alist(...)))){
+    checkmate::assert_names(.dotsnames,type='unique'
+                            ,disjunct.from = c('na.rm','probs','names','x'
+                                               ,'breaks'));
+    };
+  breaks <- stats::quantile(xx,probs=probs,names=FALSE,na.rm=TRUE,...);
+  breaks[1] <- -Inf; breaks[length(breaks)] <- Inf;
+  out<-try(cut(xx,breaks,...),silent=TRUE);
+  if(methods::is(out,'try-error')){
+    if(.error.recover && grepl("'breaks' are not unique",out)){
+      retry <- match.call(); retry$bins <- bins - 1; retry$xx <- xx;
+      warning("The 'bins' argument is too large. Trying a smaller value.");
+      suppressWarnings(return(eval(retry)))} else {
+      stop(out)}
+    };
+  out;
+}
+
+
+#' Take a \code{coxph} model and create a survival curve stratified into
+#' \code{bins} levels of the model's linear predictor to see how good the model
+#' is at startifying risk groups.
+#'
+#' @param cph       A \code{coxph} fitted model (with a formula)
+#' @param bins      A a single numeric variable indicating how many bins to
+#'                  break the linear predictor from the \code{coxph} model
+#'                  into. Passed to \code{qcut}. Three by default.
+#' @param addcols   A character vector saying which columns from the original
+#'                  data should be included
+#' @param ...       Passed to \code{qcut}
+#' @param .keepdata Whether to attach the data frame extracted from the
+#'                  \code{coxph} model to the output via a \code{data}
+#'                  attribute
+#'
+#' @return  A \code{survfit} object
+coxph2survfit <- function(cph,bins=3,addcols=c(),...,.keepdata=TRUE){
+  if(!checkmate::check_class(cph,'coxph')){
+    warning("The 'cph' argument is not numeric. Not guaranteed to work.")};
+  checkmate::qassert(bins,'n+[2,]');
+  checkmate::qassert(addcols,'S*');
+  if(length(.dotsnames<-setdiff(names(match.call())
+                                ,c(names(formals(sys.function())),'')))>0){
+    checkmate::assert_names(.dotsnames,type='unique'
+                            ,disjunct.from = c('na.rm','names','x','breaks'));
+  };
+  datargs <- list(formula=cph,data=eval(cph$call$data));
+  for(ii in intersect(addcols,names(datargs$data))){
+    datargs[[ii]] <- as.name(ii)};
+  dat <- do.call(get_all_vars,datargs) %>% augment(cph,newdata=.) %>%
+    mutate(group=qcut(.fitted,bins=bins,...));
+  sft <- cph$call; sft[[1]] <- bquote(survfit);
+  out <- eval(sft) %>% update(.~group,data=dat);
+  if(.keepdata) attr(out,'data') <- dat;
+  environment(out) <- environment();
+  out;
+}
+
+#'
 #' @param filename Path to the file
 #' @param maxsize  Maximum number of bytes to read
 #' @param textbytes Which characters are used by normal (though not necessarily
