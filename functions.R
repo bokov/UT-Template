@@ -231,10 +231,16 @@ try_import <- function(file,which=1,
 #' @examples suppress(library(survival))
 suppress <- function(expr,warnings=TRUE,messages=TRUE,startup=TRUE
                      ,capture=FALSE){
+  origsink <- sink.number();
+  on.exit(suppressWarnings(if(sink.number(type='output')>origsink){
+    sink(type='output');
+    sink()}));
   f1 <- if(warnings) suppressWarnings else identity;
   f2 <- if(messages) suppressMessages else identity;
   f3 <- if(startup) suppressPackageStartupMessages else identity;
-  f4 <- if(capture) function(xx) invisible(capture.output(xx)) else return;
+  f4 <- if(capture) function(xx){
+    .junko<-invisible(capture.output(.junkm<-capture.output(xx,type='message')
+                           ,type='output'))} else identity;
   f4(f3(f2(f1(expr))));
 }
 
@@ -661,6 +667,9 @@ resample <- function(xx,nn=5){
 #'                    returned to the console or report. For now the only check
 #'                    done on it is whether it is \code{>0} (default is
 #'                    \code{0}).
+#' @param msg         Function used for printing messages. Should take a first
+#'                    argument and a list as the second argument.
+#' @param msgopts     List of options to pass to \code{msg}
 #' @param ...         Arguments to pass to the function specified in
 #'                    \code{rendfn} (advanced, could cause errors if
 #'                    certain arguments are used)
@@ -671,7 +680,8 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                       ,fallbackdir='scripts',envir=parent.frame()
                       ,loadfn=if(exists('tload')) tload else load
                       ,render=getOption('load_deps.render',TRUE)
-                      ,debug=0
+                      ,debug=0,msg=getOption('ripcord.messagefun',message)
+                      ,msgopts=list()
                       ,...){
   if(length(deps)==0||identical(deps,'')){message('No dependencies.');return();}
   # what objects got loaded by this function
@@ -687,7 +697,7 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
       if(!is.null(iiscript<-find_path(ii,c(scriptdir,fallbackdir)))){
         # TODO: modify all files to write their cached results to a user
         # specified path if one is provided
-        message(sprintf('Trying to initialize cache using script %s'
+        msg(sprintf('Trying to initialize cache using script %s'
                         ,iiscript));
         # if rendering the scriports and not just running them
         rcmd <- if(get_os() == 'windows') 'Rscript' else 'R';
@@ -702,7 +712,8 @@ load_deps2 <- function(deps,scriptdir=getwd(),cachedir=scriptdir
                   ,normalizePath(iiscript,winslash='/'))};
         if(debug>0) message('load_deps.render:',getOption('load_deps.render'));
         if(debug>0) message('About to run:\n',cmd,'\n');
-        if(debug==0) .junk <- suppress(system(cmd,intern = TRUE)) else {
+        if(debug==0) {
+          .junk <- suppress(system(cmd,intern = TRUE),capture=TRUE) } else {
           system(cmd,intern=TRUE)};
         # again try to find a valid path to it
         iicached <- find_path(paste0(ii,'.rdata')
