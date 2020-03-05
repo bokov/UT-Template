@@ -15,12 +15,18 @@
 #'
 #' Upstream repo
 options(ripcord.startrun=getOption('ripcord.startrun',Sys.time()));
+options(ripcord.messagefun=getOption('ripcord.messagefun'
+                                     ,if(isNamespaceLoaded('cli')){
+                                       function(xx,...){
+                                         message(cli::col_grey(xx,...))}
+                                     } else message));
 options(git.upstream='git@github.com:bokov/2019-FA-TSCI-5050');
 options(repos=c(CRAN='https://cloud.r-project.org'));
 options(datatable.na.strings = getOption('datatable.na.strings'
                                          ,c('NA','','.','-','(null)','NULL'
                                             ,'N/A','null')));
 options(datatable.integer64=getOption('datatable.integer64','character'));
+
 #' get current working directory
 cwd <- getwd(); cwd;
 #' If `global.R` isn't found, try to find it
@@ -88,6 +94,8 @@ if(file.exists('functions.R')) source('functions.R');
 instrequire(
   c(# argument validation
     'checkmate'
+    # text formatting
+    ,'cli'
     # just-in-time compilation
     # 'compiler'
 
