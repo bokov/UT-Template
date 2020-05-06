@@ -47,7 +47,7 @@ qcut <- function(xx,bins=3,probs=seq(0,1,length.out=round(bins)+1),...
                  ,.error.recover=TRUE){
   # validate arguments
   checkmate::qassert(xx,'*>1');
-  if(not(checkmate::qtest(xx,'n>1'))){
+  if(!(checkmate::qtest(xx,'n>1'))){
     warning("The 'xx' argument is not numeric. Not guaranteed to work.")};
   checkmate::qassert(bins,'n+[2,]');
   checkmate::qassert(probs, 'N>2[0,1]')
