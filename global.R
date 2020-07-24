@@ -230,6 +230,10 @@ setwd(.workdir);
 #.loadedobjects <- tidbits:::load_deps(.deps,cachedir = .workdir);
 if(.debug) message('LOADING DEPENDENCIES');
 .loadedobjects <- load_deps2(.deps,cachedir = .workdir,debug=.debug);
+if(exists('projectoptions')){
+  message('Loading project options');
+  options(projectoptions);
+}
 # files already existing ----
 .origfiles <- ls(all=TRUE);
 c()
