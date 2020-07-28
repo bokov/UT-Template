@@ -582,6 +582,8 @@ unprefsuf <- function(xx,pattern="^([^0-9.-]*)([0-9.-]+)(.*$)"){
   infxs;
 }
 
+# Simulation ----
+
 #' Internal function used by \code{simdata}.
 randomstr <- function(nn,minlen=2,maxlen=8,len
                       ,chars=c(LETTERS,letters,0:9,0:9)){
@@ -635,6 +637,32 @@ subsample <- function(xx,prob=c(.5,.5)){
 resample <- function(xx,nn=5){
   setNames(replicate(nn,sample(xx,size=length(xx),replace=TRUE),simplify=FALSE)
            ,sprintf('resample%03d',seq_len(nn)))}
+
+# Data dictionary ----
+
+#' AFTER having used a dictionary to rename columns in a data.frame, update
+#' the dictionary 
+#' 
+
+sync_dictionary <- function(dat,dict=try(get("dct0"), silent = TRUE)
+                            ,retcol=getOption('tb.retcol')
+                            ,rename=getOption('tb.renamecol','rename')
+                            ,reduce=FALSE,filename='',write=export){
+  # check input
+  stopifnot(retcol %in% names(dict));
+  stopifnot(rename %in% names(dict));
+  # create multi search-replace object
+  searchrep <- subset(setNames(dict[,c(retcol,rename)],c('retcol','rename'))
+                      ,rename %in% names(dat));
+  # search replace the values in retcol with the values in rename
+  dict[[retcol]] <- submulti(dict[[retcol]],searchrep=searchrep,'startsends');
+  # remove the rename values that have been used
+  dict[[rename]][dict[[rename]]==dict[[retcol]]] <- NA;
+  if(reduce) dict <- dict[dict[[retcol]] %in% names(dat),];
+  if(filename!='') write(dict,filename);
+  return(dict);
+}
+
 
 # Project-specific functions ----
 # These functions will probably not be moved to a package because they make
