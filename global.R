@@ -68,15 +68,22 @@ if(!require('devtools',quietly=.debug==0)){
   install.packages('devtools',dependencies=TRUE,quiet=.debug==0
                    ,repos=getOption('repos','https://cran.rstudio.com'))};
 #devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
-devtools::install_github('bokov/tidbits',ref='integration'
-                         ,quiet= .debug == 0);
-devtools::install_github('bokov/rio',ref='master'
-                         ,quiet= .debug == 0);
+if(!file.exists('.tidbits_installed')) {
+  .trytidbits <- try(devtools::install_github('bokov/tidbits',ref='integration'
+                                              ,quiet= .debug == 0))};
+if(!file.exists('.rio_installed')){
+  .tryrio <- try(devtools::install_github('bokov/rio',ref='master'
+                                          ,quiet= .debug == 0))};
 library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
-rio::install_formats(quiet=.debug==0
-                     ,repos=getOption('repos','https://cran.rstudio.com'))
-library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
-
+if(!file.exists('.rio_installed')) {
+  rio::install_formats(quiet=.debug==0
+                       ,repos=getOption('repos','https://cran.rstudio.com'));
+  if('package:rio' %in% search()) file.create('.rio_installed');
+  };
+library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0
+        , verbose = .debug>0);
+if('package:tidbits' %in% search() && !file.exists('.tidbits_installed')){
+  file.create('.tidbits_installed')};
 
 
 #+ echo=F
@@ -172,7 +179,7 @@ if(!exists('inputdata')) stop('Your `config.R` or `local.config.R` file does '
 #' Make sure all files listed in `inputdata` actually exist
 for(ii in seq_along(inputdata)){
   if(is.null(.iipath<-tidbits::find_filepath(inputdata[ii]))){
-    stop('Cannot find file ',inputdata[ii])} else {
+    warning('Cannot find file ',inputdata[ii])} else {
       inputdata[ii] <- .iipath}};
 inputdata <- setNames(normalizePath(inputdata,winslash='/'),names(inputdata));
 if(.debug) message('Inputdata:\n\t',paste(inputdata,collapse=',\n\t'));
@@ -198,7 +205,7 @@ dctfile <- paste0('dct_',basename(inputdata));
 #' listed level should be renamed to.
 levels_map_file <- 'levels_map.csv';
 #' random seed
-project_seed <- 20190108;
+if(!exists('project_seed')) project_seed <- 20190108;
 options(gitstamp_prod=F);
 
 #+ echo=F
