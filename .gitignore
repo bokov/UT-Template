@@ -42,6 +42,8 @@ local
 
 # Other temp files
 .~lock.*#
+.rio_installed
+.tidbits_installed
 
 # We don't commit data unless we really mean it.
 *.csv
