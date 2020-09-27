@@ -67,23 +67,34 @@ if(!exists('.deps')) .deps <- c('');
 if(!require('devtools',quietly=.debug==0)){
   install.packages('devtools',dependencies=TRUE,quiet=.debug==0
                    ,repos=getOption('repos','https://cran.rstudio.com'))};
-#devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
-if(!file.exists('.tidbits_installed')) {
-  .trytidbits <- try(devtools::install_github('bokov/tidbits',ref='integration'
-                                              ,quiet= .debug == 0))};
-if(!file.exists('.rio_installed')){
-  .tryrio <- try(devtools::install_github('bokov/rio',ref='master'
-                                          ,quiet= .debug == 0))};
-library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
-if(!file.exists('.rio_installed')) {
+if(!require('tidbits',quietly=.debug==0)){
+  install.packages('https://github.com/bokov/tidbits/archive/integration.tar.gz'
+                   ,repos=NULL);
+  library(tidbits,quietly=.debug==0,warn.conflicts = .debug>0, verbose=.debug>0);
+}
+if(!require('rio',quietly=.debug==0)){
+  install.packages('rio',repos=getOption('repos','https://cran.rstudio.com'));
   rio::install_formats(quiet=.debug==0
                        ,repos=getOption('repos','https://cran.rstudio.com'));
-  if('package:rio' %in% search()) file.create('.rio_installed');
-  };
-library(tidbits,quietly= .debug==0, warn.conflicts = .debug>0
-        , verbose = .debug>0);
-if('package:tidbits' %in% search() && !file.exists('.tidbits_installed')){
-  file.create('.tidbits_installed')};
+  library(rio,quietly=.debug==0,warn.conflicts = .debug>0, verbose=.debug>0);
+}
+#devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
+# if(!file.exists('.tidbits_installed')) {
+#   .trytidbits <- try(devtools::install_github('bokov/tidbits',ref='integration'
+#                                               ,quiet= .debug == 0))};
+# if(!file.exists('.rio_installed')){
+#   .tryrio <- try(devtools::install_github('bokov/rio',ref='master'
+#                                           ,quiet= .debug == 0))};
+# library(rio,quietly= .debug==0, warn.conflicts = .debug>0, verbose = .debug>0);
+# if(!file.exists('.rio_installed')) {
+#   rio::install_formats(quiet=.debug==0
+#                        ,repos=getOption('repos','https://cran.rstudio.com'));
+#   if('package:rio' %in% search()) file.create('.rio_installed');
+#   };
+# library('tidbits',quietly= .debug==0, warn.conflicts = .debug>0
+#         , verbose = .debug>0);
+# if('package:tidbits' %in% search() && !file.exists('.tidbits_installed')){
+#   file.create('.tidbits_installed')};
 
 
 #+ echo=F
