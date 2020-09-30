@@ -655,7 +655,9 @@ sync_dictionary <- function(dat,dict=try(get("dct0"), silent = TRUE)
   searchrep <- subset(setNames(dict[,c(retcol,rename)],c('retcol','rename'))
                       ,rename %in% names(dat));
   # search replace the values in retcol with the values in rename
-  dict[[retcol]] <- submulti(dict[[retcol]],searchrep=searchrep,'startsends');
+  if(nrow(searchrep)>0){
+    dict[[retcol]] <- submulti(dict[[retcol]],searchrep=searchrep,'startsends');
+  };
   # remove the rename values that have been used
   dict[[rename]][dict[[rename]]==dict[[retcol]]] <- NA;
   if(reduce) dict <- dict[dict[[retcol]] %in% names(dat),];
