@@ -643,6 +643,7 @@ resample <- function(xx,nn=5){
 #' AFTER having used a dictionary to rename columns in a data.frame, update
 #' the dictionary 
 #' 
+#' reduce can take a numeric value. If > 1, also reduce the columns
 
 sync_dictionary <- function(dat,dict=try(get("dct0"), silent = TRUE)
                             ,retcol=getOption('tb.retcol')
@@ -661,6 +662,12 @@ sync_dictionary <- function(dat,dict=try(get("dct0"), silent = TRUE)
   # remove the rename values that have been used
   dict[[rename]][dict[[rename]]==dict[[retcol]]] <- NA;
   if(reduce) dict <- dict[dict[[retcol]] %in% names(dat),];
+  if(reduce>1){
+    remcols <- grep('^c_',v(dat=dat,dict=dict),val=TRUE);
+    remcols <- sapply(dict[,remcols],function(xx) sum(xx %in% c(TRUE,'TRUE')));
+    remcols <- names(remcols)[remcols==0];
+    dict <- dict[,setdiff(names(dict),remcols)];
+  }
   if(filename!='') write(dict,filename);
   return(dict);
 }
