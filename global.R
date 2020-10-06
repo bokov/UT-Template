@@ -252,6 +252,8 @@ if(exists('projectoptions')){
   message('Loading project options');
   options(projectoptions);
 }
+if(file.exists(projfns <-file.path(.workdir,'projectfunctions.R'))){
+  source(projfns)};
 # files already existing ----
 .origfiles <- ls(all=TRUE);
 c()
