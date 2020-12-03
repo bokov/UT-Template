@@ -172,7 +172,7 @@ file_args <- list(check.names=T,blank.lines.skip=T);
 #' ## Load local config file
 #'
 # local_config ----
-.configpath <- tidbits::find_filepath('config.R'
+.configpath <- tidbits:::find_filepath('config.R'
                                       ,pathexcl='[[:punct:]]backup\\.');
 if(is.null(.configpath)){
   stop('Please copy example_config.R to config.R, modify it so that the '
@@ -190,7 +190,7 @@ if(!exists('inputdata')) stop('Your `config.R` or `local.config.R` file does '
                               ,'not have an `inputdata` variable set');
 #' Make sure all files listed in `inputdata` actually exist
 for(ii in seq_along(inputdata)){
-  if(is.null(.iipath<-tidbits::find_filepath(inputdata[ii]))){
+  if(is.null(.iipath<-tidbits:::find_filepath(inputdata[ii]))){
     warning('Cannot find file ',inputdata[ii])} else {
       inputdata[ii] <- .iipath}};
 inputdata <- setNames(normalizePath(inputdata,winslash='/'),names(inputdata));
