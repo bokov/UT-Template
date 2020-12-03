@@ -102,6 +102,7 @@ if(!require('rio',quietly=.debug==0)){
 #' ## Load some local functions
 #+ warning=FALSE, message=FALSE
 if(file.exists('functions.R')) source('functions.R');
+if(!exists('instrequire')) instrequire <- tidbits:::instrequire;
 
 #+ echo=F
 # libs -------------------------------------------------------------------------
